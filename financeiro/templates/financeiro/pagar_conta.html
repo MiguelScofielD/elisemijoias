@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Pagar Conta{% endblock %}
+
+{% block content %}
+<h1>Pagar Conta</h1>
+
+<p><strong>Venda:</strong> {{ conta.venda.id }}</p>
+<p><strong>Valor total:</strong> R$ {{ conta.valor }}</p>
+<p><strong>Total pago:</strong> R$ {{ conta.total_pago }}</p>
+<p><strong>Saldo:</strong> R$ {{ conta.saldo }}</p>
+
+<form method="post" class="col-md-4">
+    {% csrf_token %}
+
+    <label>Valor do pagamento</label>
+    <input
+        type="number"
+        step="0.01"
+        max="{{ conta.saldo }}"
+        name="valor"
+        class="form-control mb-3"
+        required
+    >
+
+    <button class="btn btn-success">Registrar Pagamento</button>
+</form>
+{% endblock %}

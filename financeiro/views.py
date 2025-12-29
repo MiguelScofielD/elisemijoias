@@ -1,6 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.timezone import now
 from .models import ContaReceber
+from decimal import Decimal
+from .models import ContaReceber, PagamentoRecebido
+from clientes.models import Cliente
+
+
 
 def contas_receber(request):
     filtro = request.GET.get("status")
@@ -19,5 +24,41 @@ def contas_receber(request):
         {
             "contas": contas,
             "filtro": filtro,
+        }
+    )
+
+def pagar_conta(request, conta_id):
+    conta = ContaReceber.objects.get(id=conta_id)
+
+    if request.method == "POST":
+        valor_pago = Decimal(request.POST.get("valor"))
+
+        if valor_pago > 0 and valor_pago <= conta.saldo():
+            PagamentoRecebido.objects.create(
+                conta=conta,
+                valor=valor_pago
+            )
+
+        return redirect("financeiro:contas_receber")
+
+    return render(
+        request,
+        "financeiro/pagar_conta.html",
+        {"conta": conta}
+    )
+
+def historico_cliente(request, cliente_id):
+    cliente = Cliente.objects.get(id=cliente_id)
+
+    contas = ContaReceber.objects.filter(
+        venda__cliente=cliente
+    ).prefetch_related("pagamentos")
+
+    return render(
+        request,
+        "financeiro/historico_cliente.html",
+        {
+            "cliente": cliente,
+            "contas": contas
         }
     )
