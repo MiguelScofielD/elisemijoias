@@ -11,22 +11,22 @@ class ContaReceber(models.Model):
     vencimento = models.DateField()
     pago = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f"Venda {self.venda_id} - R$ {self.valor}"
+    # def __str__(self):
+    #     return f"Venda {self.venda_id} - R$ {self.valor}"
     
     def total_pago(self):
-        return self.pagamentos.aggregate(
-            total=Sum("valor")
-        )["total"] or 0
+        return sum(p.valor for p in self.pagamentos.all())
 
     def saldo(self):
         return self.valor - self.total_pago()
 
-    def status(self):
-        if self.saldo() <= 0:
-            return "Paga"
-        return "Em aberto"
+    def atualizar_status(self):
+        """Atualiza automaticamente o campo pago"""
+        self.pago = self.saldo() <= 0
+        self.save(update_fields=["pago"])
     
+    def __str__(self):
+        return f"Conta #{self.id} - Venda {self.venda.id}"
     
 
 class PagamentoRecebido(models.Model):

@@ -1,35 +1,110 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Nova Venda</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Nova Venda{% endblock %}
 
-<h1>Nova Venda</h1>
+{% block content %}
 
-<form method="post" action="{% url 'vendas:adicionar_codigo' %}">
-    {% csrf_token %}
-    <input type="text" name="codigo_barras" autofocus placeholder="Leia o código">
-</form>
+<h2 class="mb-4">🛒 Nova Venda</h2>
 
-<h2>Carrinho</h2>
+<div class="row">
 
-{% if carrinho %}
-<table border="1">
-<tr>
-    <th>Produto</th><th>Qtd</th><th>Preço</th>
-</tr>
-{% for item in carrinho.values %}
-<tr>
-    <td>{{ item.nome }}</td>
-    <td>{{ item.quantidade }}</td>
-    <td>R$ {{ item.preco }}</td>
-</tr>
-{% endfor %}
-</table>
-{% else %}
-<p>Carrinho vazio</p>
-{% endif %}
+    <!-- LEITOR -->
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
 
-</body>
-</html>
+                <h6 class="text-muted mb-3">
+                    Leitura de Código de Barras
+                </h6>
+
+                <form method="post" action="{% url 'vendas:adicionar_codigo' %}">
+                    {% csrf_token %}
+
+                    <input
+                        type="text"
+                        name="codigo_barras"
+                        class="form-control form-control-lg mb-3"
+                        placeholder="Leia o código do produto"
+                        autofocus
+                        onfocus="this.select();"
+                    >
+
+                    <button class="btn btn-success w-100">
+                        ➕ Adicionar
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- CARRINHO -->
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h6 class="text-muted mb-3">
+                    Itens no Carrinho
+                </h6>
+
+                {% if carrinho %}
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Produto</th>
+                            <th class="text-center">Qtd</th>
+                            <th class="text-end">Preço</th>
+                            <th class="text-end">Subtotal</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for pid, item in carrinho.items %}
+                        <tr>
+                            <td><strong>{{ item.nome }}</strong></td>
+                            <td class="text-center">{{ item.quantidade }}</td>
+                            <td class="text-end">R$ {{ item.preco }}</td>
+                            <td class="text-end">
+                                R$ {{ item.preco|floatformat:2|add:item.quantidade|floatformat:2 }}
+                            </td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-danger"
+                                   href="{% url 'vendas:remover_do_carrinho' pid %}">
+                                   Remover
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <h4>
+                        Total:
+                        <span class="text-success">
+                            R$ {{ total }}
+                        </span>
+                    </h4>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <a href="{% url 'vendas:confirmar_venda' %}"
+                       class="btn btn-success btn-lg">
+                        Finalizar Venda
+                    </a>
+                </div>
+
+                {% else %}
+                    <p class="text-muted text-center mb-0">
+                        Carrinho vazio.
+                    </p>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

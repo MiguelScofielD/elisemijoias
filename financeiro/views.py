@@ -39,6 +39,9 @@ def pagar_conta(request, conta_id):
                 valor=valor_pago
             )
 
+            # 🔥 ATUALIZA STATUS AUTOMATICAMENTE
+            conta.atualizar_status()
+
         return redirect("financeiro:contas_receber")
 
     return render(

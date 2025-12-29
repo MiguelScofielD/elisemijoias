@@ -11,7 +11,17 @@ from clientes.models import Cliente
 
 def nova_venda(request):
     carrinho = request.session.get("carrinho", {})
-    return render(request, "vendas/nova_venda.html", {"carrinho": carrinho})
+    total = calcular_totais(carrinho)
+
+    return render(
+        request,
+        "vendas/nova_venda.html",
+        {
+            "carrinho": carrinho,
+            "total": total
+        }
+    )
+
 
 
 def adicionar_por_codigo(request):
@@ -179,4 +189,4 @@ def finalizar_venda(request):
     request.session["carrinho"] = {}
     request.session.modified = True
 
-    return redirect("vendas:ver_carrinho")
+    return redirect("vendas:nova_venda")
