@@ -1,0 +1,22 @@
+# Ambiente virtual
+venv/
+.env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Banco
+db.sqlite3
+
+# Certificados
+*.crt
+*.key
+*.pem
+
+# VS Code
+.vscode/
+
+# Arquivos de mídia (se houver)
+media/

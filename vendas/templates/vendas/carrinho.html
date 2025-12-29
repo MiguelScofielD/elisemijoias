@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Carrinho</title>
+</head>
+<body>
+
+<h1>Carrinho de Compras</h1>
+
+{% if carrinho %}
+<table border="1" cellpadding="6">
+    <tr>
+        <th>Produto</th>
+        <th>Qtd</th>
+        <th>Preço</th>
+        <th>Subtotal</th>
+        <th>Ação</th>
+    </tr>
+
+    {% for pid, item in carrinho.items %}
+    <tr>
+        <td>{{ item.nome }}</td>
+        <td>{{ item.quantidade }}</td>
+        <td>R$ {{ item.preco }}</td>
+        <td>R$ {{ item.subtotal }}</td>
+        <td>
+            <a href="/vendas/carrinho/remover/{{ pid }}/">
+                Remover
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+<p><strong>Total:</strong> R$ {{ total }}</p>
+
+<a href="{% url 'vendas:limpar_carrinho' %}">Limpar carrinho</a>
+
+{% else %}
+<p>Carrinho vazio</p>
+{% endif %}
+
+</body>
+</html>
+
