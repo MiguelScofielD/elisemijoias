@@ -6,11 +6,17 @@ from django.utils.timezone import now
 from vendas.models import Venda
 from produtos.models import Produto
 from financeiro.models import ContaReceber
+from django.db.models import Count
+
 
 
 def dashboard(request):
     hoje = now().date()
 
+    total_produtos = Produto.objects.count()
+    estoque_baixo = Produto.objects.filter(
+        estoque__lte=models.F("estoque_minimo")
+    ).count()
     # Vendas
     total_hoje = (
         Venda.objects
@@ -31,9 +37,12 @@ def dashboard(request):
         estoque__lte=models.F("estoque_minimo")
     )
 
-    # Contas a receber em aberto
-    contas_abertas = ContaReceber.objects.filter(pago=False)
-    total_receber = contas_abertas.aggregate(Sum("valor"))["valor__sum"] or 0
+    contas_abertas = ContaReceber.objects.all()
+
+    total_receber = sum(
+        conta.saldo() for conta in contas_abertas if conta.saldo() > 0
+    )
+
 
     # Últimas vendas
     ultimas_vendas = Venda.objects.order_by("-data")[:5]
@@ -48,5 +57,7 @@ def dashboard(request):
             "produtos_baixo_estoque": produtos_baixo_estoque,
             "total_receber": total_receber,
             "ultimas_vendas": ultimas_vendas,
+            "total_produtos": total_produtos,
+            "estoque_baixo": estoque_baixo,
         }
     )

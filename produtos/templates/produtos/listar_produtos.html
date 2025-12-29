@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Estoque{% endblock %}
+
+{% block content %}
+<h1>Estoque de Produtos</h1>
+
+<div class="row">
+{% for produto in produtos %}
+    <div class="col-md-3">
+        <div class="card mb-4">
+
+            {% if produto.imagem %}
+            <img src="{{ produto.imagem.url }}" class="card-img-top">
+            {% endif %}
+
+            <div class="card-body">
+                <h6>{{ produto.nome }}</h6>
+                <p class="mb-1">R$ {{ produto.preco }}</p>
+                <p class="mb-1">Estoque: {{ produto.estoque }}</p>
+                <small>Cód.: {{ produto.codigo_barras }}</small>
+            </div>
+
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% endblock %}

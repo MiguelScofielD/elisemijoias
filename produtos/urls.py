@@ -12,4 +12,6 @@ urlpatterns += [
 urlpatterns += [
     path("etiquetas/selecao/", views.selecionar_etiquetas, name="selecionar_etiquetas"),
     path("etiquetas/gerar/", views.gerar_etiquetas_selecionadas, name="gerar_etiquetas"),
+    path("estoque/", views.listar_produtos, name="listar_produtos"),
+
 ]

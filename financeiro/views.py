@@ -47,18 +47,7 @@ def pagar_conta(request, conta_id):
         {"conta": conta}
     )
 
-def historico_cliente(request, cliente_id):
-    cliente = Cliente.objects.get(id=cliente_id)
-
-    contas = ContaReceber.objects.filter(
-        venda__cliente=cliente
-    ).prefetch_related("pagamentos")
-
-    return render(
-        request,
-        "financeiro/historico_cliente.html",
-        {
-            "cliente": cliente,
-            "contas": contas
-        }
-    )
+def historico_cliente(request, cliente_id): 
+    cliente = Cliente.objects.get(id=cliente_id) 
+    contas = ContaReceber.objects.filter( venda__cliente=cliente ).prefetch_related("pagamentos") 
+    return render( request, "financeiro/historico_cliente.html", { "cliente": cliente, "contas": contas } )

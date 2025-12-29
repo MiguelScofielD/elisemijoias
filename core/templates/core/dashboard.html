@@ -34,6 +34,29 @@
         </div>
     </div>
 
+    <!-- TOTAL DE PRODUTOS -->
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <h6>Total de Produtos</h6>
+            <h3>{{ total_produtos }}</h3>
+            <a href="{% url 'produtos:listar_produtos' %}" class="small">
+                Ver estoque
+            </a>
+        </div>
+    </div>
+
+    <!-- ESTOQUE BAIXO -->
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <h6>Estoque Baixo</h6>
+            <h3 class="text-danger">{{ estoque_baixo }}</h3>
+            <a href="{% url 'produtos:listar_produtos' %}" class="small">
+                Conferir produtos
+            </a>
+        </div>
+    </div>
+
+
 </div>
 
 <hr class="my-4">

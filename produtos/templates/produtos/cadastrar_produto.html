@@ -4,15 +4,18 @@
 {% block content %}
 <h1>Cadastrar Produto</h1>
 
-<form method="post" class="col-md-6">
+<form method="post" enctype="multipart/form-data" class="col-md-6">
     {% csrf_token %}
 
     <input class="form-control mb-2" name="nome" placeholder="Nome" required>
-    <input class="form-control mb-2" name="codigo_barras" placeholder="Código de barras" required>
     <input class="form-control mb-2" name="preco" placeholder="Preço" required>
-    <input class="form-control mb-2" name="estoque" placeholder="Estoque inicial" required>
+    <input class="form-control mb-2" name="estoque" placeholder="Estoque" required>
     <input class="form-control mb-2" name="estoque_minimo" placeholder="Estoque mínimo">
 
-    <button class="btn btn-dark">Salvar</button>
+    <label class="form-label">Imagem do produto</label>
+    <input type="file" name="imagem" class="form-control mb-3">
+
+    <button class="btn btn-success">Salvar</button>
 </form>
 {% endblock %}
+
