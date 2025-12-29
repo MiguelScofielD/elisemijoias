@@ -6,7 +6,7 @@ from django.db import transaction
 from clientes.models import Cliente
 from vendas.models import Venda, ItemVenda
 from financeiro.models import ContaReceber
-
+from clientes.models import Cliente
 
 
 def nova_venda(request):
@@ -106,22 +106,20 @@ def limpar_carrinho(request):
 
 def confirmar_venda(request):
     carrinho = request.session.get("carrinho", {})
+    clientes = Cliente.objects.all()
 
-    if not carrinho:
-        return redirect("vendas:ver_carrinho")
-
-    total = 0
-    for item in carrinho.values():
-        total += item["preco"] * item["quantidade"]
+    total = sum(item["preco"] * item["quantidade"] for item in carrinho.values())
 
     return render(
         request,
         "vendas/confirmar_venda.html",
         {
             "carrinho": carrinho,
-            "total": total
+            "total": total,
+            "clientes": clientes,
         }
     )
+
 
 @transaction.atomic
 def finalizar_venda(request):

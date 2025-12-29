@@ -24,3 +24,11 @@ urlpatterns = [
     path("relatorios/", include("relatorios.urls")),
     path("produtos/", include("produtos.urls")),
 ]
+
+urlpatterns += [
+    path("clientes/", include("clientes.urls")),
+]
+
+urlpatterns += [
+    path("financeiro/", include("financeiro.urls")),
+]

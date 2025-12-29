@@ -1,8 +1,50 @@
 from django.http import FileResponse
 from .models import Produto
 from .utils import gerar_etiquetas
+from django.shortcuts import render, redirect
+from .models import Produto
+from .utils import gerar_etiquetas_personalizadas
+
 
 def etiquetas_produtos(request):
     produtos = Produto.objects.all()
     pdf = gerar_etiquetas(produtos)
+    return FileResponse(open(pdf, "rb"), content_type="application/pdf")
+
+def cadastrar_produto(request):
+    if request.method == "POST":
+        Produto.objects.create(
+            nome=request.POST.get("nome"),
+            codigo_barras=request.POST.get("codigo_barras"),
+            preco=request.POST.get("preco"),
+            estoque=request.POST.get("estoque"),
+            estoque_minimo=request.POST.get("estoque_minimo"),
+        )
+        return redirect("produtos:cadastrar_produto")
+
+    return render(request, "produtos/cadastrar_produto.html")
+
+def selecionar_etiquetas(request):
+    produtos = Produto.objects.all()
+    return render(
+        request,
+        "produtos/etiquetas_selecao.html",
+        {"produtos": produtos}
+    )
+
+def gerar_etiquetas_selecionadas(request):
+    if request.method != "POST":
+        return redirect("produtos:selecionar_etiquetas")
+
+    produtos_ids = request.POST.getlist("produto")
+    quantidades = request.POST
+
+    produtos_quantidade = []
+
+    for pid in produtos_ids:
+        qtd = int(quantidades.get(f"quantidade_{pid}", 1))
+        produtos_quantidade.append((pid, qtd))
+
+    pdf = gerar_etiquetas_personalizadas(produtos_quantidade)
+
     return FileResponse(open(pdf, "rb"), content_type="application/pdf")

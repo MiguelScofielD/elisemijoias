@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Etiquetas de Produtos{% endblock %}
+
+{% block content %}
+<h1>Etiquetas de Produtos</h1>
+
+<form method="post" action="{% url 'produtos:gerar_etiquetas' %}">
+    {% csrf_token %}
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Selecionar</th>
+                <th>Produto</th>
+                <th>Quantidade de etiquetas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            <tr>
+                <td>
+                    <input type="checkbox" name="produto" value="{{ produto.id }}">
+                </td>
+                <td>{{ produto.nome }}</td>
+                <td>
+                    <input
+                        type="number"
+                        name="quantidade_{{ produto.id }}"
+                        value="1"
+                        min="1"
+                        class="form-control"
+                        style="width: 120px"
+                    >
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button class="btn btn-success">
+        Gerar Etiquetas
+    </button>
+</form>
+{% endblock %}
