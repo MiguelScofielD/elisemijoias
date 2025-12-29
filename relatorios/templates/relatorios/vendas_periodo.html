@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Relatório de Vendas{% endblock %}
+
+{% block content %}
+<h1>Vendas por Período</h1>
+
+<form method="get" class="row g-3 mb-3">
+    <div class="col-md-3">
+        <input type="date" name="inicio" class="form-control" value="{{ inicio }}">
+    </div>
+    <div class="col-md-3">
+        <input type="date" name="fim" class="form-control" value="{{ fim }}">
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-dark">Filtrar</button>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for venda in vendas %}
+        <tr>
+            <td>{{ venda.id }}</td>
+            <td>{{ venda.data|date:"d/m/Y" }}</td>
+            <td>R$ {{ venda.total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h4>Total: R$ {{ total }}</h4>
+{% endblock %}

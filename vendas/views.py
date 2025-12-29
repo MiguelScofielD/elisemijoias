@@ -2,6 +2,11 @@ from django.contrib import messages
 from produtos.models import Produto
 from django.shortcuts import render, redirect, get_object_or_404
 from .utils import calcular_totais
+from django.db import transaction
+from clientes.models import Cliente
+from vendas.models import Venda, ItemVenda
+from financeiro.models import ContaReceber
+
 
 
 def nova_venda(request):
@@ -94,9 +99,86 @@ def remover_do_carrinho(request, produto_id):
     return redirect("vendas:ver_carrinho")
 
 
-
 def limpar_carrinho(request):
     request.session["carrinho"] = {}
     request.session.modified = True
     return redirect("vendas:ver_carrinho")
 
+def confirmar_venda(request):
+    carrinho = request.session.get("carrinho", {})
+
+    if not carrinho:
+        return redirect("vendas:ver_carrinho")
+
+    total = 0
+    for item in carrinho.values():
+        total += item["preco"] * item["quantidade"]
+
+    return render(
+        request,
+        "vendas/confirmar_venda.html",
+        {
+            "carrinho": carrinho,
+            "total": total
+        }
+    )
+
+@transaction.atomic
+def finalizar_venda(request):
+    carrinho = request.session.get("carrinho", {})
+
+    if not carrinho:
+        return redirect("vendas:ver_carrinho")
+
+    cliente_id = request.POST.get("cliente")
+    cliente = None
+
+    if cliente_id:
+        cliente = Cliente.objects.get(id=cliente_id)
+
+    # 1️⃣ Criar venda
+    venda = Venda.objects.create(
+        cliente=cliente,
+        status="finalizada"
+    )
+
+    total = 0
+
+    # 2️⃣ Criar itens da venda + baixar estoque
+    for item in carrinho.values():
+        produto = Produto.objects.get(id=item["produto_id"])
+
+        if produto.estoque < item["quantidade"]:
+            raise Exception("Estoque insuficiente")
+
+        ItemVenda.objects.create(
+            venda=venda,
+            produto=produto,
+            quantidade=item["quantidade"],
+            preco_unitario=item["preco"]
+        )
+
+        produto.estoque -= item["quantidade"]
+        produto.save()
+
+        total += item["preco"] * item["quantidade"]
+
+    # 3️⃣ Atualizar total da venda
+    venda.total = total
+    venda.save()
+
+    # 4️⃣ Criar conta a receber (exemplo: pagamento a prazo)
+    prazo = request.POST.get("prazo")
+
+    if prazo == "sim":
+        ContaReceber.objects.create(
+            venda=venda,
+            valor=total,
+            vencimento=request.POST.get("vencimento")
+        )
+
+    # 5️⃣ Limpar carrinho
+    request.session["carrinho"] = {}
+    request.session.modified = True
+
+    return redirect("vendas:ver_carrinho")

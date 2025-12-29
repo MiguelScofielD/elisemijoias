@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Sistema de Vendas{% endblock %}</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    >
+</head>
+
+<body class="bg-light">
+
+<!-- TOPO -->
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <span class="navbar-brand">
+            Elise Mi Joias
+        </span>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- SIDEBAR -->
+        <aside class="col-md-2 bg-white border-end vh-100 p-3">
+            <ul class="nav flex-column gap-2">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'core:dashboard' %}">
+                        📊 Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'vendas:ver_carrinho' %}">
+                        🛒 Vendas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'relatorios:vendas_periodo' %}">
+                        📄 Relatórios
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/">
+                        ⚙️ Admin
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- CONTEÚDO -->
+        <main class="col-md-10 p-4">
+            {% block content %}{% endblock %}
+        </main>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

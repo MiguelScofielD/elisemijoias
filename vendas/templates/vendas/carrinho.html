@@ -1,47 +1,45 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Carrinho</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Carrinho{% endblock %}
 
-<h1>Carrinho de Compras</h1>
+{% block content %}
+<h1>Carrinho</h1>
 
 {% if carrinho %}
-<table border="1" cellpadding="6">
-    <tr>
-        <th>Produto</th>
-        <th>Qtd</th>
-        <th>Preço</th>
-        <th>Subtotal</th>
-        <th>Ação</th>
-    </tr>
-
-    {% for pid, item in carrinho.items %}
-    <tr>
-        <td>{{ item.nome }}</td>
-        <td>{{ item.quantidade }}</td>
-        <td>R$ {{ item.preco }}</td>
-        <td>R$ {{ item.subtotal }}</td>
-        <td>
-            <a href="/vendas/carrinho/remover/{{ pid }}/">
-                Remover
-            </a>
-        </td>
-    </tr>
-    {% endfor %}
-
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Produto</th>
+            <th>Qtd</th>
+            <th>Preço</th>
+            <th>Subtotal</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pid, item in carrinho.items %}
+        <tr>
+            <td>{{ item.nome }}</td>
+            <td>{{ item.quantidade }}</td>
+            <td>R$ {{ item.preco }}</td>
+            <td>R$ {{ item.subtotal }}</td>
+            <td>
+                <a class="btn btn-sm btn-danger"
+                   href="{% url 'vendas:remover_do_carrinho' pid %}">
+                   Remover
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 
-<p><strong>Total:</strong> R$ {{ total }}</p>
+<h4>Total: R$ {{ total }}</h4>
 
-<a href="{% url 'vendas:limpar_carrinho' %}">Limpar carrinho</a>
+<a href="{% url 'vendas:confirmar_venda' %}" class="btn btn-success">
+    Finalizar venda
+</a>
 
 {% else %}
 <p>Carrinho vazio</p>
 {% endif %}
-
-</body>
-</html>
-
+{% endblock %}

@@ -18,6 +18,9 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    path("", include("core.urls")),  # dashboard
     path("admin/", admin.site.urls),
     path("vendas/", include("vendas.urls")),
+    path("relatorios/", include("relatorios.urls")),
+    path("produtos/", include("produtos.urls")),
 ]

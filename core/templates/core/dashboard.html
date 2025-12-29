@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<div class="row g-4">
+
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <h6>Total hoje</h6>
+            <h4>R$ {{ total_hoje }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <h6>Total mês</h6>
+            <h4>R$ {{ total_mes }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <h6>Vendas</h6>
+            <h4>{{ qtd_vendas }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <h6>A receber</h6>
+            <h4>R$ {{ total_receber }}</h4>
+        </div>
+    </div>
+
+</div>
+
+<hr class="my-4">
+
+<h4>Últimas vendas</h4>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Total</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for venda in ultimas_vendas %}
+        <tr>
+            <td>{{ venda.id }}</td>
+            <td>{{ venda.data|date:"d/m/Y H:i" }}</td>
+            <td>R$ {{ venda.total }}</td>
+            <td>{{ venda.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

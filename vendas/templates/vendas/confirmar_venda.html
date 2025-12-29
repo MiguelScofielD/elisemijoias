@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmar Venda</title>
+</head>
+<body>
+
+<h1>Confirmar Venda</h1>
+
+<table border="1" cellpadding="6">
+<tr>
+    <th>Produto</th>
+    <th>Qtd</th>
+    <th>Preço</th>
+    <th>Subtotal</th>
+</tr>
+
+{% for item in carrinho.values %}
+<tr>
+    <td>{{ item.nome }}</td>
+    <td>{{ item.quantidade }}</td>
+    <td>R$ {{ item.preco }}</td>
+    <td>R$ {{ item.preco|floatformat:2 }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<p><strong>Total:</strong> R$ {{ total }}</p>
+
+<form method="post" action="{% url 'vendas:finalizar_venda' %}">
+    {% csrf_token %}
+
+    <label>Venda a prazo?</label>
+    <select name="prazo">
+        <option value="nao">Não</option>
+        <option value="sim">Sim</option>
+    </select>
+
+    <br><br>
+
+    <label>Vencimento (se prazo):</label>
+    <input type="date" name="vencimento">
+
+    <br><br>
+
+    <button type="submit">Finalizar Venda</button>
+</form>
+
+</body>
+</html>

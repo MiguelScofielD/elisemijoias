@@ -3,21 +3,49 @@ from barcode.writer import ImageWriter
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 import os
+from django.conf import settings
 
-def gerar_etiqueta(produto):
-    codigo = produto.codigo_barras
+def gerar_etiquetas(produtos):
+    """
+    Gera um PDF com etiquetas de produtos (em lote)
+    """
+    pasta = os.path.join(settings.MEDIA_ROOT, "etiquetas")
+    os.makedirs(pasta, exist_ok=True)
 
-    barcode = Code128(codigo, writer=ImageWriter())
-    barcode_path = f"media/barcodes/{codigo}"
-    barcode.save(barcode_path)
-
-    pdf_path = f"media/etiquetas/{codigo}.pdf"
+    pdf_path = os.path.join(pasta, "etiquetas_produtos.pdf")
     c = canvas.Canvas(pdf_path, pagesize=A4)
 
-    c.drawString(100, 750, produto.nome)
-    c.drawString(100, 730, f"R$ {produto.preco}")
-    c.drawImage(f"{barcode_path}.png", 100, 650, width=200, height=50)
+    largura, altura = A4
+
+    x = 40
+    y = altura - 80
+
+    for produto in produtos:
+        # --- gerar código de barras ---
+        barcode = Code128(produto.codigo_barras, writer=ImageWriter())
+        barcode_path = os.path.join(pasta, f"{produto.id}")
+        barcode.save(barcode_path)
+
+        # --- texto ---
+        c.setFont("Helvetica", 9)
+        c.drawString(x, y, produto.nome)
+        c.drawString(x, y - 12, f"R$ {produto.preco}")
+
+        # --- imagem do código de barras ---
+        c.drawImage(
+            f"{barcode_path}.png",
+            x,
+            y - 60,
+            width=120,
+            height=40
+        )
+
+        # --- próxima etiqueta ---
+        y -= 120
+
+        if y < 100:
+            c.showPage()
+            y = altura - 80
 
     c.save()
-
     return pdf_path
