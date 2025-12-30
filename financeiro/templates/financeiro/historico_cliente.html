@@ -1,42 +1,94 @@
 {% extends "base.html" %}
-{% block title %}Histórico Financeiro{% endblock %}
+{% load matematica %}
+{% block title %}Histórico do Cliente{% endblock %}
+
 
 {% block content %}
-<h1>Histórico Financeiro — {{ cliente.nome }}</h1>
 
-{% for conta in contas %}
-<div class="card mb-3 p-3">
+<h2 class="mb-4">
+    📜 Histórico — {{ cliente.nome }}
+</h2>
 
-    <div class="row">
-        <div class="col-md-4">
-            <strong>Venda:</strong> #{{ conta.venda.id }}
+{% for venda in vendas %}
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+
+        <!-- CABEÇALHO -->
+        <div class="d-flex justify-content-between mb-2">
+            <strong>Venda #{{ venda.id }}</strong>
+            <span class="text-muted">
+                {{ venda.data|date:"d/m/Y H:i" }}
+            </span>
         </div>
-        <div class="col-md-4">
-            <strong>Valor total:</strong> R$ {{ conta.valor }}
+
+        <!-- PRODUTOS DA VENDA -->
+        <table class="table table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Produto</th>
+                    <th class="text-center">Qtd</th>
+                    <th class="text-end">Preço Unit.</th>
+                    <th class="text-end">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in venda.itens.all %}
+                <tr>
+                    <td>{{ item.produto.nome }}</td>
+                    <td class="text-center">{{ item.quantidade }}</td>
+                    <td class="text-end">R$ {{ item.preco_unitario }}</td>
+                    <td class="text-end">
+                        R$ {{ item.quantidade|mul:item.preco_unitario }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- RESUMO FINANCEIRO -->
+        {% if venda.contareceber %}
+        <div class="row mt-2">
+            <div class="col-md-4">
+                <strong>Total:</strong>
+                R$ {{ venda.contareceber.valor }}
+            </div>
+            <div class="col-md-4">
+                <strong>Pago:</strong>
+                R$ {{ venda.contareceber.total_pago }}
+            </div>
+            <div class="col-md-4">
+                <strong>Saldo devedor:</strong>
+                <span class="{% if venda.contareceber.saldo > 0 %}text-danger{% else %}text-success{% endif %}">
+                    R$ {{ venda.contareceber.saldo }}
+                </span>
+            </div>
         </div>
-        <div class="col-md-4">
-            <strong>Saldo devedor:</strong> R$ {{ conta.saldo }}
-        </div>
-    </div>
 
-    <hr>
-
-    <h6>Pagamentos</h6>
-
-    {% if conta.pagamentos.all %}
-        <ul>
-            {% for pagamento in conta.pagamentos.all %}
-                <li>
-                    {{ pagamento.data|date:"d/m/Y H:i" }} — R$ {{ pagamento.valor }}
-                </li>
+        <!-- PAGAMENTOS -->
+        {% if venda.contareceber.pagamentos.all %}
+        <hr>
+        <h6>Pagamentos</h6>
+        <ul class="small">
+            {% for p in venda.contareceber.pagamentos.all %}
+            <li>
+                {{ p.data|date:"d/m/Y" }} — R$ {{ p.valor }}
+            </li>
             {% endfor %}
         </ul>
-    {% else %}
-        <p>Nenhum pagamento registrado.</p>
-    {% endif %}
+        {% endif %}
 
+        {% else %}
+            <p class="text-success mt-2">
+                ✔ Venda paga à vista
+            </p>
+        {% endif %}
+
+    </div>
 </div>
 {% empty %}
-<p>Nenhuma conta encontrada para este cliente.</p>
+<p class="text-muted">
+    Nenhuma venda encontrada para este cliente.
+</p>
 {% endfor %}
+
 {% endblock %}

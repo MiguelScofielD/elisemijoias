@@ -5,6 +5,7 @@ from decimal import Decimal
 from .models import ContaReceber, PagamentoRecebido
 from clientes.models import Cliente
 from django.db.models import Sum
+from vendas.models import Venda
 
 
 
@@ -52,12 +53,27 @@ def pagar_conta(request, conta_id):
         {"conta": conta}
     )
 
-def historico_cliente(request, cliente_id): 
-    cliente = Cliente.objects.get(id=cliente_id) 
-    contas = ContaReceber.objects.filter( venda__cliente=cliente ).prefetch_related("pagamentos") 
-    return render( request, "financeiro/historico_cliente.html", { "cliente": cliente, "contas": contas } )
+def historico_cliente(request, cliente_id):
+    cliente = Cliente.objects.get(id=cliente_id)
 
-from clientes.models import Cliente
+    vendas = (
+        Venda.objects
+        .filter(cliente=cliente)
+        .prefetch_related(
+            "itens__produto",
+            "contareceber__pagamentos"
+        )
+        .order_by("-data")
+    )
+
+    return render(
+        request,
+        "financeiro/historico_cliente.html",
+        {
+            "cliente": cliente,
+            "vendas": vendas
+        }
+    )
 
 def lista_clientes(request):
     busca = request.GET.get("q", "")
