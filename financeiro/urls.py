@@ -12,3 +12,6 @@ urlpatterns += [
 urlpatterns += [
     path("cliente/<int:cliente_id>/", views.historico_cliente, name="historico_cliente"),
 ]
+urlpatterns += [
+    path("clientes/", views.lista_clientes, name="lista_clientes"),
+]

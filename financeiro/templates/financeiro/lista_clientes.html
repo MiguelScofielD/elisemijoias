@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Clientes{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">👥 Clientes</h2>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input
+            type="text"
+            name="q"
+            value="{{ busca }}"
+            class="form-control"
+            placeholder="Buscar cliente pelo nome"
+        >
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-outline-secondary">
+            Buscar
+        </button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Cliente</th>
+            <th class="text-end">Saldo em Aberto</th>
+            <th class="text-center">Situação</th>
+            <th class="text-center">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in dados %}
+        <tr>
+            <td>
+                <strong>{{ item.cliente.nome }}</strong>
+            </td>
+
+            <td class="text-end">
+                R$ {{ item.saldo }}
+            </td>
+
+            <td class="text-center">
+                {% if item.saldo > 0 %}
+                    <span class="badge bg-danger">
+                        Inadimplente
+                    </span>
+                {% else %}
+                    <span class="badge bg-success">
+                        Em dia
+                    </span>
+                {% endif %}
+            </td>
+
+            <td class="text-center">
+                <a
+                    href="{% url 'financeiro:historico_cliente' item.cliente.id %}"
+                    class="btn btn-sm btn-outline-primary"
+                >
+                    Ver histórico
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center text-muted">
+                Nenhum cliente encontrado.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
