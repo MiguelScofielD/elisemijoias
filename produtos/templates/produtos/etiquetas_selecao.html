@@ -2,26 +2,49 @@
 {% block title %}Etiquetas de Produtos{% endblock %}
 
 {% block content %}
-<h1>Etiquetas de Produtos</h1>
+<h1 class="mb-4">Etiquetas de Produtos</h1>
 
 <form method="post" action="{% url 'produtos:gerar_etiquetas' %}">
     {% csrf_token %}
 
-    <table class="table table-bordered">
-        <thead>
+    <table class="table table-bordered align-middle">
+        <thead class="table-light">
             <tr>
-                <th>Selecionar</th>
+                <th style="width:80px;">Selecionar</th>
+                <th style="width:120px;">Imagem</th>
                 <th>Produto</th>
-                <th>Quantidade de etiquetas</th>
+                <th style="width:200px;">Quantidade de etiquetas</th>
             </tr>
         </thead>
         <tbody>
             {% for produto in produtos %}
             <tr>
-                <td>
+                <!-- CHECKBOX -->
+                <td class="text-center">
                     <input type="checkbox" name="produto" value="{{ produto.id }}">
                 </td>
-                <td>{{ produto.nome }}</td>
+
+                <!-- IMAGEM -->
+                <td class="text-center">
+                    {% if produto.imagem %}
+                        <img
+                            src="{{ produto.imagem.url }}"
+                            alt="{{ produto.nome }}"
+                            style="width:80px;height:80px;object-fit:cover;border-radius:6px;"
+                        >
+                    {% else %}
+                        <span class="text-muted small">
+                            Sem imagem
+                        </span>
+                    {% endif %}
+                </td>
+
+                <!-- NOME -->
+                <td>
+                    <strong>{{ produto.nome }}</strong>
+                </td>
+
+                <!-- QUANTIDADE -->
                 <td>
                     <input
                         type="number"
@@ -29,7 +52,7 @@
                         value="1"
                         min="1"
                         class="form-control"
-                        style="width: 120px"
+                        style="width:120px"
                     >
                 </td>
             </tr>

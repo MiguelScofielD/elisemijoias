@@ -2,6 +2,7 @@ from django.db import models
 
 class Produto(models.Model):
     nome = models.CharField(max_length=150)
+    imagem = models.ImageField(upload_to="produtos/", blank=True, null=True)
     codigo_barras = models.CharField(max_length=20, unique=True)
     preco = models.DecimalField(max_digits=10, decimal_places=2)
     estoque = models.IntegerField()
