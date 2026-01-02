@@ -66,20 +66,60 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>ID</th>
+            <th>Venda</th>
+            <th>Cliente</th>
+            <th>Produtos</th>
             <th>Data</th>
             <th>Total</th>
             <th>Status</th>
+
         </tr>
     </thead>
     <tbody>
         {% for venda in ultimas_vendas %}
         <tr>
-            <td>{{ venda.id }}</td>
+            <!-- VENDA -->
+            <td>#{{ venda.id }}</td>
+
+            <!-- CLIENTE -->
+            <td>
+                {% if venda.cliente %}
+                    {{ venda.cliente.nome }}
+                {% else %}
+                    Consumidor Final
+                {% endif %}
+            </td>
+
+            <!-- PRODUTOS -->
+            <td>
+                <ul class="mb-0 ps-3">
+                    {% for item in venda.itens.all %}
+                        <li>
+                            {{ item.produto.nome }}
+                            <span class="text-muted">
+                                ({{ item.quantidade }}x)
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+
+            <!-- DATA -->
             <td>{{ venda.data|date:"d/m/Y H:i" }}</td>
+
+            <!-- TOTAL -->
             <td>R$ {{ venda.total }}</td>
-            <td>{{ venda.status }}</td>
+
+            <!-- STATUS -->
+            <td>
+                {% if venda.status == "finalizada" %}
+                    <span class="badge bg-success">Finalizada</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">Aberta</span>
+                {% endif %}
+            </td>
         </tr>
+
         {% endfor %}
     </tbody>
 </table>

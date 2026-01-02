@@ -45,7 +45,13 @@ def dashboard(request):
 
 
     # Últimas vendas
-    ultimas_vendas = Venda.objects.order_by("-data")[:5]
+    ultimas_vendas = (
+        Venda.objects
+        .select_related("cliente")
+        .prefetch_related("itens__produto")
+        .order_by("-data")[:5]
+    )
+
 
     return render(
         request,
