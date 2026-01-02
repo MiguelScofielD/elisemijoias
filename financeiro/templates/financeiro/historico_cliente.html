@@ -61,7 +61,17 @@
                 <span class="{% if venda.contareceber.saldo > 0 %}text-danger{% else %}text-success{% endif %}">
                     R$ {{ venda.contareceber.saldo }}
                 </span>
+
+                {% if venda.contareceber.saldo > 0 %}
+                    <div class="mt-2">
+                        <a href="{% url 'financeiro:pagar_conta' venda.contareceber.id %}"
+                        class="btn btn-sm btn-success">
+                            💳 Registrar pagamento
+                        </a>
+                    </div>
+                {% endif %}
             </div>
+
         </div>
 
         <!-- PAGAMENTOS -->
