@@ -5,6 +5,8 @@ from django.shortcuts import render, redirect
 from .models import Produto
 from .utils import gerar_etiquetas_personalizadas
 from .models import Produto, gerar_codigo_barras
+from django.db.models import Q
+
 
 
 
@@ -27,15 +29,28 @@ def cadastrar_produto(request):
 
     return render(request, "produtos/cadastrar_produto.html")
 
-
-
 def selecionar_etiquetas(request):
+    busca = request.GET.get("q", "")
+    selecionados = request.GET.getlist("produto")  # 🔴 ATENÇÃO AQUI
+
     produtos = Produto.objects.all()
+
+    if busca:
+        produtos = produtos.filter(
+            Q(nome__icontains=busca) |
+            Q(codigo_barras__icontains=busca)
+        )
+
     return render(
         request,
         "produtos/etiquetas_selecao.html",
-        {"produtos": produtos}
+        {
+            "produtos": produtos,
+            "busca": busca,
+            "selecionados": selecionados,
+        }
     )
+
 
 def gerar_etiquetas_selecionadas(request):
     if request.method != "POST":
@@ -55,9 +70,21 @@ def gerar_etiquetas_selecionadas(request):
     return FileResponse(open(pdf, "rb"), content_type="application/pdf")
 
 def listar_produtos(request):
+    busca = request.GET.get("q", "")
+
     produtos = Produto.objects.all()
+
+    if busca:
+        produtos = produtos.filter(
+            Q(nome__icontains=busca) |
+            Q(codigo_barras__icontains=busca)
+        )
+
     return render(
         request,
         "produtos/listar_produtos.html",
-        {"produtos": produtos}
+        {
+            "produtos": produtos,
+            "busca": busca
+        }
     )

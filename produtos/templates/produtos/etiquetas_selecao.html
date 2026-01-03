@@ -4,59 +4,70 @@
 {% block content %}
 <h1 class="mb-4">Etiquetas de Produtos</h1>
 
+<!-- BUSCA -->
+<form method="get" action="{% url 'produtos:selecionar_etiquetas' %}" class="row mb-3">
+    <div class="col-md-4">
+        <input
+            type="text"
+            name="q"
+            value="{{ busca }}"
+            class="form-control"
+            placeholder="Buscar por nome ou código de barras"
+        >
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-outline-secondary">
+            Buscar
+        </button>
+    </div>
+</form>
+
+<!-- LISTA / SELEÇÃO -->
 <form method="post" action="{% url 'produtos:gerar_etiquetas' %}">
     {% csrf_token %}
 
     <table class="table table-bordered align-middle">
         <thead class="table-light">
             <tr>
-                <th style="width:80px;">Selecionar</th>
-                <th style="width:120px;">Imagem</th>
+                <th>Selecionar</th>
+                <th>Imagem</th>
                 <th>Produto</th>
-                <th style="width:200px;">Quantidade de etiquetas</th>
+                <th>Qtd etiquetas</th>
             </tr>
         </thead>
         <tbody>
-            {% for produto in produtos %}
-            <tr>
-                <!-- CHECKBOX -->
-                <td class="text-center">
-                    <input type="checkbox" name="produto" value="{{ produto.id }}">
-                </td>
+        {% for produto in produtos %}
+        <tr>
+            <td class="text-center">
+                <input type="checkbox" name="produto" value="{{ produto.id }}">
+            </td>
 
-                <!-- IMAGEM -->
-                <td class="text-center">
-                    {% if produto.imagem %}
-                        <img
-                            src="{{ produto.imagem.url }}"
-                            alt="{{ produto.nome }}"
-                            style="width:80px;height:80px;object-fit:cover;border-radius:6px;"
-                        >
-                    {% else %}
-                        <span class="text-muted small">
-                            Sem imagem
-                        </span>
-                    {% endif %}
-                </td>
+            <td class="text-center">
+                {% if produto.imagem %}
+                    <img src="{{ produto.imagem.url }}"
+                         style="width:70px;height:70px;object-fit:cover;border-radius:6px;">
+                {% else %}
+                    <span class="text-muted small">Sem imagem</span>
+                {% endif %}
+            </td>
 
-                <!-- NOME -->
-                <td>
-                    <strong>{{ produto.nome }}</strong>
-                </td>
+            <td>
+                <strong>{{ produto.nome }}</strong><br>
+                <small class="text-muted">Cód.: {{ produto.codigo_barras }}</small>
+            </td>
 
-                <!-- QUANTIDADE -->
-                <td>
-                    <input
-                        type="number"
-                        name="quantidade_{{ produto.id }}"
-                        value="1"
-                        min="1"
-                        class="form-control"
-                        style="width:120px"
-                    >
-                </td>
-            </tr>
-            {% endfor %}
+            <td>
+                <input
+                    type="number"
+                    name="quantidade_{{ produto.id }}"
+                    value="1"
+                    min="1"
+                    class="form-control"
+                    style="width:120px"
+                >
+            </td>
+        </tr>
+        {% endfor %}
         </tbody>
     </table>
 
@@ -64,4 +75,43 @@
         Gerar Etiquetas
     </button>
 </form>
+
+<!-- SCRIPT PRECISA FICAR AQUI -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const selecionados = new Set(
+        JSON.parse(localStorage.getItem("produtosSelecionados") || "[]")
+    );
+
+    document.querySelectorAll('input[type="checkbox"][name="produto"]').forEach(cb => {
+        const id = cb.value;
+
+        if (selecionados.has(id)) {
+            cb.checked = true;
+        }
+
+        cb.addEventListener("change", () => {
+            if (cb.checked) {
+                selecionados.add(id);
+            } else {
+                selecionados.delete(id);
+            }
+
+            localStorage.setItem(
+                "produtosSelecionados",
+                JSON.stringify([...selecionados])
+            );
+        });
+    });
+
+    const formGerar = document.querySelector("form[action$='gerar/']");
+    if (formGerar) {
+        formGerar.addEventListener("submit", () => {
+            localStorage.removeItem("produtosSelecionados");
+        });
+    }
+});
+</script>
+
 {% endblock %}

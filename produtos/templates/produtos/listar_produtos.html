@@ -4,6 +4,24 @@
 {% block content %}
 <h1>Estoque de Produtos</h1>
 
+<form method="get" class="row mb-4">
+    <div class="col-md-4">
+        <input
+            type="text"
+            name="q"
+            value="{{ busca }}"
+            class="form-control"
+            placeholder="Buscar por nome ou código de barras"
+            autofocus
+        >
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-outline-secondary">
+            Buscar
+        </button>
+    </div>
+</form>
+
 <div class="row">
 {% for produto in produtos %}
     <div class="col-md-3">
@@ -20,6 +38,12 @@
                 <small>Cód.: {{ produto.codigo_barras }}</small>
             </div>
 
+        </div>
+    </div>
+{% empty %}
+    <div class="col-12">
+        <div class="alert alert-warning">
+            Nenhum produto encontrado para a busca.
         </div>
     </div>
 {% endfor %}
