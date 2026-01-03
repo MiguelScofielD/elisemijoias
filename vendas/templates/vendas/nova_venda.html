@@ -7,7 +7,7 @@
 
 <div class="row">
 
-    <!-- LEITOR -->
+    <!-- LEITOR DE CÓDIGO -->
     <div class="col-md-4">
         <div class="card shadow-sm mb-4">
             <div class="card-body">
@@ -16,21 +16,29 @@
                     Leitura de Código de Barras
                 </h6>
 
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+
+                <!-- FORMULÁRIO PDV (SEM BOTÃO) -->
                 <form method="post" action="{% url 'vendas:adicionar_codigo' %}">
                     {% csrf_token %}
 
                     <input
                         type="text"
                         name="codigo_barras"
-                        class="form-control form-control-lg mb-3"
+                        class="form-control form-control-lg"
                         placeholder="Leia o código do produto"
                         autofocus
                         onfocus="this.select();"
+                        value="{{ codigo_invalido }}"
                     >
 
-                    <button class="btn btn-success w-100">
-                        ➕ Adicionar
-                    </button>
                 </form>
 
             </div>
@@ -65,7 +73,7 @@
                             <td class="text-center">{{ item.quantidade }}</td>
                             <td class="text-end">R$ {{ item.preco }}</td>
                             <td class="text-end">
-                                R$ {{ item.preco|floatformat:2|add:item.quantidade|floatformat:2 }}
+                                R$ {{ item.preco|floatformat:2 }}
                             </td>
                             <td class="text-end">
                                 <a class="btn btn-sm btn-danger"
@@ -97,7 +105,7 @@
 
                 {% else %}
                     <p class="text-muted text-center mb-0">
-                        Carrinho vazio.
+                        Carrinho vazio. Leia um código de barras.
                     </p>
                 {% endif %}
 
@@ -106,5 +114,15 @@
     </div>
 
 </div>
+
+<!-- GARANTIR FOCO APÓS REDIRECT -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const campo = document.querySelector('input[name="codigo_barras"]');
+    if (campo) {
+        campo.focus();
+    }
+});
+</script>
 
 {% endblock %}

@@ -13,35 +13,57 @@ def nova_venda(request):
     carrinho = request.session.get("carrinho", {})
     total = calcular_totais(carrinho)
 
+    codigo_invalido = request.session.pop("codigo_invalido", "")
+
     return render(
         request,
         "vendas/nova_venda.html",
         {
             "carrinho": carrinho,
-            "total": total
+            "total": total,
+            "codigo_invalido": codigo_invalido,
         }
     )
 
 
 
 def adicionar_por_codigo(request):
-    codigo = request.POST.get("codigo_barras")
+    codigo = (
+        request.POST
+        .get("codigo_barras", "")
+        .replace("\n", "")
+        .replace("\r", "")
+        .replace("\t", "")
+        .strip()
+    )
+
+    if not codigo:
+        return redirect("vendas:nova_venda")
 
     try:
         produto = Produto.objects.get(codigo_barras=codigo)
     except Produto.DoesNotExist:
+        messages.error(
+            request,
+            f"Código {codigo} não encontrado no sistema."
+        )
+
+        # 🔴 GUARDA O CÓDIGO PARA REEXIBIR
+        request.session["codigo_invalido"] = codigo
         return redirect("vendas:nova_venda")
 
-    carrinho = request.session.get("carrinho", {})
+    # ✅ LIMPA SE EXISTIA ERRO ANTERIOR
+    request.session.pop("codigo_invalido", None)
 
-    pid = str(produto.id)  # ✅ REGRA DE OURO
+    carrinho = request.session.get("carrinho", {})
+    pid = str(produto.id)
 
     if pid in carrinho:
         carrinho[pid]["quantidade"] += 1
     else:
         carrinho[pid] = {
             "produto_id": produto.id,
-            "codigo_barras": produto.codigo_barras,  # só informativo
+            "codigo_barras": produto.codigo_barras,
             "nome": produto.nome,
             "preco": float(produto.preco),
             "quantidade": 1,
@@ -51,6 +73,8 @@ def adicionar_por_codigo(request):
     request.session.modified = True
 
     return redirect("vendas:nova_venda")
+
+
 
 
 def ver_carrinho(request):
