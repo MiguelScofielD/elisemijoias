@@ -130,7 +130,7 @@ def remover_do_carrinho(request, produto_id):
     request.session["carrinho"] = carrinho
     request.session.modified = True
 
-    return redirect("vendas:ver_carrinho")
+    return redirect("vendas:nova_venda")
 
 
 def limpar_carrinho(request):
