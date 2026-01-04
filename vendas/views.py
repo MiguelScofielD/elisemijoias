@@ -7,6 +7,7 @@ from clientes.models import Cliente
 from vendas.models import Venda, ItemVenda
 from financeiro.models import ContaReceber
 from clientes.models import Cliente
+from decimal import Decimal
 
 
 def nova_venda(request):
@@ -160,23 +161,23 @@ def finalizar_venda(request):
     carrinho = request.session.get("carrinho", {})
 
     if not carrinho:
-        return redirect("vendas:ver_carrinho")
+        return redirect("vendas:nova_venda")
 
     cliente_id = request.POST.get("cliente")
-    cliente = None
+    cliente = Cliente.objects.get(id=cliente_id) if cliente_id else None
 
-    if cliente_id:
-        cliente = Cliente.objects.get(id=cliente_id)
+    # 🔹 DESCONTO (VALOR FIXO EM R$)
+    desconto = Decimal(request.POST.get("desconto") or 0)
 
-    # 1️⃣ Criar venda
+    # 🔹 CRIA VENDA
     venda = Venda.objects.create(
         cliente=cliente,
         status="finalizada"
     )
 
-    total = 0
+    subtotal = Decimal("0.00")
 
-    # 2️⃣ Criar itens da venda + baixar estoque
+    # 🔹 ITENS DA VENDA
     for item in carrinho.values():
         produto = Produto.objects.get(id=item["produto_id"])
 
@@ -193,23 +194,31 @@ def finalizar_venda(request):
         produto.estoque -= item["quantidade"]
         produto.save()
 
-        total += item["preco"] * item["quantidade"]
+        subtotal += Decimal(item["preco"]) * item["quantidade"]
 
-    # 3️⃣ Atualizar total da venda
-    venda.total = total
+    # 🔹 GARANTIA DE DESCONTO VÁLIDO
+    if desconto < 0:
+        desconto = Decimal("0.00")
+
+    if desconto > subtotal:
+        desconto = subtotal
+
+    # 🔹 TOTAIS FINAIS
+    venda.subtotal = subtotal
+    venda.desconto = desconto
+    venda.total = subtotal - desconto
     venda.save()
 
-    # 4️⃣ Criar conta a receber (exemplo: pagamento a prazo)
+    # 🔹 CONTA A RECEBER (USA TOTAL FINAL)
     prazo = request.POST.get("prazo")
-
     if prazo == "sim":
         ContaReceber.objects.create(
             venda=venda,
-            valor=total,
+            valor=venda.total,
             vencimento=request.POST.get("vencimento")
         )
 
-    # 5️⃣ Limpar carrinho
+    # 🔹 LIMPA CARRINHO
     request.session["carrinho"] = {}
     request.session.modified = True
 

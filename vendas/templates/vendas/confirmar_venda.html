@@ -2,30 +2,91 @@
 {% block title %}Confirmar Venda{% endblock %}
 
 {% block content %}
-<h1>Confirmar Venda</h1>
+<h2 class="mb-4">✔ Confirmar Venda</h2>
 
 <form method="post" action="{% url 'vendas:finalizar_venda' %}">
     {% csrf_token %}
 
-    <label>Cliente</label>
-    <select name="cliente" class="form-control mb-3">
-        <option value="">Consumidor Final</option>
-        {% for cliente in clientes %}
-        <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
-        {% endfor %}
-    </select>
+    <!-- CLIENTE -->
+    <div class="mb-3">
+        <label class="form-label">Cliente</label>
+        <select name="cliente" class="form-select">
+            <option value="">Consumidor Final</option>
+            {% for cliente in clientes %}
+                <option value="{{ cliente.id }}">
+                    {{ cliente.nome }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
 
-    <label>Forma de pagamento</label>
-    <select name="prazo" class="form-control mb-3">
-        <option value="nao">À vista</option>
-        <option value="sim">A prazo</option>
-    </select>
+    <!-- CARRINHO -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Qtd</th>
+                <th>Preço</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in carrinho.values %}
+            <tr>
+                <td>{{ item.nome }}</td>
+                <td>{{ item.quantidade }}</td>
+                <td>R$ {{ item.preco }}</td>
+                <td>
+                    R$ {{ item.preco|floatformat:2 }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    <label>Vencimento (se prazo)</label>
-    <input type="date" name="vencimento" class="form-control mb-3">
+    <!-- DESCONTO -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <strong>Subtotal:</strong>
+        </div>
+        <div class="col-md-6 text-end">
+            R$ {{ total }}
+        </div>
+    </div>
 
-    <h4>Total: R$ {{ total }}</h4>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label class="form-label">Desconto (R$)</label>
+        </div>
+        <div class="col-md-6">
+            <input
+                type="number"
+                name="desconto"
+                step="0.01"
+                min="0"
+                value="0"
+                class="form-control"
+            >
+        </div>
+    </div>
 
-    <button class="btn btn-success">Finalizar Venda</button>
+    <!-- PRAZO -->
+    <div class="mb-3">
+        <label class="form-label">Pagamento a prazo?</label>
+        <select name="prazo" class="form-select">
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+        </select>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label">Vencimento</label>
+        <input type="date" name="vencimento" class="form-control">
+    </div>
+
+    <button class="btn btn-success btn-lg">
+        Finalizar Venda
+    </button>
 </form>
+
 {% endblock %}
