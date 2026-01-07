@@ -2,38 +2,136 @@
 {% block title %}Relatório de Vendas{% endblock %}
 
 {% block content %}
-<h1>Vendas por Período</h1>
+<h1 class="mb-4">📄 Relatório de Vendas por Período</h1>
 
-<form method="get" class="row g-3 mb-3">
+<!-- FILTRO -->
+<form method="get" class="row g-3 mb-4">
     <div class="col-md-3">
+        <label class="form-label">Data inicial</label>
         <input type="date" name="inicio" class="form-control" value="{{ inicio }}">
     </div>
+
     <div class="col-md-3">
+        <label class="form-label">Data final</label>
         <input type="date" name="fim" class="form-control" value="{{ fim }}">
     </div>
-    <div class="col-md-3">
-        <button class="btn btn-dark">Filtrar</button>
+
+    <div class="col-md-3 align-self-end">
+        <button class="btn btn-dark w-100">
+            Filtrar
+        </button>
     </div>
 </form>
 
-<table class="table table-striped">
-    <thead>
+<!-- TABELA -->
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
         <tr>
-            <th>ID</th>
+            <th>Venda</th>
             <th>Data</th>
-            <th>Total</th>
+            <th>Cliente</th>
+            <th>Produtos</th>
+            <th class="text-end">Subtotal</th>
+            <th class="text-end">Desconto</th>
+            <th class="text-end">Total</th>
+            <th>Status Financeiro</th>
         </tr>
     </thead>
+
     <tbody>
         {% for venda in vendas %}
         <tr>
-            <td>{{ venda.id }}</td>
-            <td>{{ venda.data|date:"d/m/Y" }}</td>
-            <td>R$ {{ venda.total }}</td>
+
+            <!-- ID -->
+            <td>#{{ venda.id }}</td>
+
+            <!-- DATA -->
+            <td>{{ venda.data|date:"d/m/Y H:i" }}</td>
+
+            <!-- CLIENTE -->
+            <td>
+                {% if venda.cliente %}
+                    {{ venda.cliente.nome }}
+                {% else %}
+                    Consumidor Final
+                {% endif %}
+            </td>
+
+            <!-- PRODUTOS -->
+            <td>
+                <ul class="mb-0 ps-3">
+                    {% for item in venda.itens.all %}
+                        <li>
+                            {{ item.produto.nome }}
+                            <span class="text-muted">
+                                ({{ item.quantidade }}x)
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+
+            <!-- SUBTOTAL -->
+            <td class="text-end">
+                R$ {{ venda.subtotal }}
+            </td>
+
+            <!-- DESCONTO -->
+            <td class="text-end">
+                {% if venda.desconto > 0 %}
+                    <span class="text-danger">
+                        - R$ {{ venda.desconto }}
+                    </span>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+
+            <!-- TOTAL -->
+            <td class="text-end">
+                <strong>
+                    R$ {{ venda.total }}
+                </strong>
+            </td>
+
+            <!-- STATUS FINANCEIRO -->
+            <td>
+                {% if venda.contareceber %}
+                    {% if venda.contareceber.saldo > 0 %}
+                        <span class="badge bg-warning text-dark">
+                            Em aberto
+                        </span>
+                    {% else %}
+                        <span class="badge bg-success">
+                            Pago
+                        </span>
+                    {% endif %}
+                {% else %}
+                    <span class="badge bg-success">
+                        À vista
+                    </span>
+                {% endif %}
+            </td>
+
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8" class="text-center text-muted">
+                Nenhuma venda encontrada para o período informado.
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<h4>Total: R$ {{ total }}</h4>
+<!-- TOTAL GERAL -->
+<div class="d-flex justify-content-end mt-3">
+    <h4>
+        Total do período:
+        <span class="text-success">
+            R$ {{ total }}
+        </span>
+    </h4>
+</div>
+
 {% endblock %}
