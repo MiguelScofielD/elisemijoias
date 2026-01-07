@@ -21,22 +21,22 @@
     </div>
 
     <!-- CARRINHO -->
-    <table class="table table-bordered">
-        <thead>
+    <table class="table table-bordered align-middle">
+        <thead class="table-light">
             <tr>
                 <th>Produto</th>
-                <th>Qtd</th>
-                <th>Preço</th>
-                <th>Subtotal</th>
+                <th class="text-center">Qtd</th>
+                <th class="text-end">Preço</th>
+                <th class="text-end">Subtotal</th>
             </tr>
         </thead>
         <tbody>
             {% for item in carrinho.values %}
             <tr>
                 <td>{{ item.nome }}</td>
-                <td>{{ item.quantidade }}</td>
-                <td>R$ {{ item.preco }}</td>
-                <td>
+                <td class="text-center">{{ item.quantidade }}</td>
+                <td class="text-end">R$ {{ item.preco }}</td>
+                <td class="text-end">
                     R$ {{ item.preco|floatformat:2 }}
                 </td>
             </tr>
@@ -44,34 +44,65 @@
         </tbody>
     </table>
 
-    <!-- DESCONTO -->
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <strong>Subtotal:</strong>
-        </div>
-        <div class="col-md-6 text-end">
-            R$ {{ total }}
+    <!-- RESUMO / DESCONTO -->
+    <div class="card mt-3">
+        <div class="card-body">
+
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <strong>Subtotal:</strong>
+                </div>
+                <div class="col-md-6 text-end">
+                    R$ {{ total }}
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- DESCONTO EM R$ -->
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <label class="form-label">Desconto (R$)</label>
+                </div>
+                <div class="col-md-6">
+                    <input
+                        type="number"
+                        name="desconto_valor"
+                        step="0.01"
+                        min="0"
+                        class="form-control"
+                        value="0"
+                    >
+                </div>
+            </div>
+
+            <!-- DESCONTO EM % -->
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <label class="form-label">Desconto (%)</label>
+                </div>
+                <div class="col-md-6">
+                    <input
+                        type="number"
+                        name="desconto_percentual"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        class="form-control"
+                        value="0"
+                    >
+                </div>
+            </div>
+
+            <small class="text-muted">
+                Preencha apenas um dos campos de desconto.
+            </small>
+
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label class="form-label">Desconto (R$)</label>
-        </div>
-        <div class="col-md-6">
-            <input
-                type="number"
-                name="desconto"
-                step="0.01"
-                min="0"
-                value="0"
-                class="form-control"
-            >
-        </div>
-    </div>
-
-    <!-- PRAZO -->
-    <div class="mb-3">
+    <!-- PAGAMENTO A PRAZO -->
+    <div class="mb-3 mt-4">
         <label class="form-label">Pagamento a prazo?</label>
         <select name="prazo" class="form-select">
             <option value="nao">Não</option>

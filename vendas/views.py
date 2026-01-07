@@ -166,8 +166,13 @@ def finalizar_venda(request):
     cliente_id = request.POST.get("cliente")
     cliente = Cliente.objects.get(id=cliente_id) if cliente_id else None
 
-    # 🔹 DESCONTO (VALOR FIXO EM R$)
-    desconto = Decimal(request.POST.get("desconto") or 0)
+    # 🔹 DESCONTOS (VALOR OU %)
+    desconto_valor = Decimal(request.POST.get("desconto_valor") or 0)
+    desconto_percentual = Decimal(request.POST.get("desconto_percentual") or 0)
+
+    # 🔒 REGRA: APENAS UM TIPO DE DESCONTO
+    if desconto_valor > 0 and desconto_percentual > 0:
+        desconto_percentual = Decimal("0.00")
 
     # 🔹 CRIA VENDA
     venda = Venda.objects.create(
@@ -196,14 +201,20 @@ def finalizar_venda(request):
 
         subtotal += Decimal(item["preco"]) * item["quantidade"]
 
-    # 🔹 GARANTIA DE DESCONTO VÁLIDO
+    # 🔹 CALCULA DESCONTO FINAL
+    if desconto_percentual > 0:
+        desconto = (subtotal * desconto_percentual) / Decimal("100")
+    else:
+        desconto = desconto_valor
+
+    # 🔒 VALIDAÇÕES DE SEGURANÇA
     if desconto < 0:
         desconto = Decimal("0.00")
 
     if desconto > subtotal:
         desconto = subtotal
 
-    # 🔹 TOTAIS FINAIS
+    # 🔹 TOTAIS
     venda.subtotal = subtotal
     venda.desconto = desconto
     venda.total = subtotal - desconto
