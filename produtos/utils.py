@@ -6,6 +6,7 @@ import os
 from django.conf import settings
 from .models import Produto
 from reportlab.lib.units import cm
+from reportlab.graphics.barcode import code128
 
 
 def gerar_etiquetas(produtos):
@@ -53,90 +54,61 @@ def gerar_etiquetas(produtos):
     c.save()
     return pdf_path
 
-
 def gerar_etiquetas_personalizadas(produtos_quantidade):
     """
-    Gera etiquetas no padrão:
-    5,2 cm (largura) x 1,0 cm (altura)
+    Etiqueta JOIAS
+    5,2 cm x 1,0 cm
+    Código de barras GRANDE e À ESQUERDA
     """
+
     pasta = os.path.join(settings.MEDIA_ROOT, "etiquetas")
     os.makedirs(pasta, exist_ok=True)
 
-    pdf_path = os.path.join(pasta, "etiquetas_selecionadas.pdf")
-    c = canvas.Canvas(pdf_path, pagesize=A4)
+    pdf_path = os.path.join(pasta, "etiquetas_joias_52x10mm.pdf")
 
-    largura_pagina, altura_pagina = A4
+    # TAMANHO REAL DA ETIQUETA
+    LARGURA = 5.2 * cm
+    ALTURA = 1.0 * cm
 
-    # MEDIDAS DA ETIQUETA
-    ETIQUETA_LARG = 5.2 * cm
-    ETIQUETA_ALT = 1.0 * cm
-
-    MARGEM_X = 1 * cm
-    MARGEM_Y = 1 * cm
-
-    x = MARGEM_X
-    y = altura_pagina - MARGEM_Y - ETIQUETA_ALT
+    c = canvas.Canvas(pdf_path, pagesize=(LARGURA, ALTURA))
 
     for produto_id, quantidade in produtos_quantidade:
         produto = Produto.objects.get(id=produto_id)
 
-        barcode = Code128(produto.codigo_barras, writer=ImageWriter())
-        barcode_path = os.path.join(pasta, f"barcode_{produto.codigo_barras}")
-        barcode.save(barcode_path)
-
         for _ in range(quantidade):
 
-            # BORDA DA ETIQUETA
-            c.setStrokeColorRGB(0.83, 0.69, 0.22)  # dourado
-            c.rect(x, y, ETIQUETA_LARG, ETIQUETA_ALT)
+            # BORDA (opcional)
+            c.setLineWidth(0.6)
+            c.setStrokeColorRGB(0.8, 0.65, 0.2)  # dourado
+            c.rect(1, 1, LARGURA - 2, ALTURA - 2)
 
             # TEXTO SUPERIOR
             c.setFont("Helvetica", 6)
-            c.drawString(
-                x + 2,
-                y + ETIQUETA_ALT - 8,
-                f"Cód.: {produto.codigo_barras}"
+            c.drawString(3, ALTURA - 7, f"Cód.: {produto.codigo_barras}")
+            c.drawRightString(LARGURA - 3, ALTURA - 7, produto.nome[:22])
+
+            # 🔥 CÓDIGO DE BARRAS REAL (NÃO IMAGEM)
+            barcode = code128.Code128(
+                produto.codigo_barras,
+                barHeight=0.55 * cm,
+                barWidth=0.038 * cm  # controla largura REAL das barras
             )
 
-            # NOME DO PRODUTO
-            c.setFont("Helvetica", 6)
-            c.drawString(
-                x + 2,
-                y + ETIQUETA_ALT - 16,
-                produto.nome[:25]
+            barcode.drawOn(
+                c,
+                -15,     # COLADO À ESQUERDA
+                3
             )
 
-            # CÓDIGO DE BARRAS (MAIOR E MAIS À ESQUERDA)
-            c.drawImage(
-                f"{barcode_path}.png",
-                x + ETIQUETA_LARG - 75,   # afastado do preço
-                y + 4,
-                width=65,                # um pouco maior
-                height=20,
-                preserveAspectRatio=True,
-                mask="auto"
-            )
-
-            # PREÇO (ISOLADO NO CANTO DIREITO)
-            c.setFont("Helvetica-Bold", 7.5)
+            # PREÇO (DIREITA)
+            c.setFont("Helvetica-Bold", 7.8)
             c.drawRightString(
-                x + ETIQUETA_LARG - 3,
-                y + 3,
-                f"{produto.preco}"
+                LARGURA - 6,
+                3,
+                f"R$ {produto.preco}"
             )
 
-
-            # PRÓXIMA POSIÇÃO (GRADE)
-            x += ETIQUETA_LARG + 5
-
-            if x + ETIQUETA_LARG > largura_pagina:
-                x = MARGEM_X
-                y -= ETIQUETA_ALT + 5
-
-            if y < MARGEM_Y:
-                c.showPage()
-                x = MARGEM_X
-                y = altura_pagina - MARGEM_Y - ETIQUETA_ALT
+            c.showPage()
 
     c.save()
     return pdf_path

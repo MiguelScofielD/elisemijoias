@@ -44,16 +44,14 @@
         </tbody>
     </table>
 
-    <!-- RESUMO / DESCONTO -->
+    <!-- RESUMO -->
     <div class="card mt-3">
         <div class="card-body">
 
             <div class="row mb-2">
-                <div class="col-md-6">
-                    <strong>Subtotal:</strong>
-                </div>
+                <div class="col-md-6"><strong>Subtotal:</strong></div>
                 <div class="col-md-6 text-end">
-                    R$ {{ total }}
+                    R$ <span id="subtotal">{{ total }}</span>
                 </div>
             </div>
 
@@ -67,6 +65,7 @@
                 <div class="col-md-6">
                     <input
                         type="number"
+                        id="desconto_valor"
                         name="desconto_valor"
                         step="0.01"
                         min="0"
@@ -84,6 +83,7 @@
                 <div class="col-md-6">
                     <input
                         type="number"
+                        id="desconto_percentual"
                         name="desconto_percentual"
                         step="0.01"
                         min="0"
@@ -94,14 +94,27 @@
                 </div>
             </div>
 
+            <hr>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Total Final:</strong>
+                </div>
+                <div class="col-md-6 text-end">
+                    <strong class="text-success">
+                        R$ <span id="total_final">{{ total }}</span>
+                    </strong>
+                </div>
+            </div>
+
             <small class="text-muted">
-                Preencha apenas um dos campos de desconto.
+                Preencha apenas um campo de desconto.
             </small>
 
         </div>
     </div>
 
-    <!-- PAGAMENTO A PRAZO -->
+    <!-- PRAZO -->
     <div class="mb-3 mt-4">
         <label class="form-label">Pagamento a prazo?</label>
         <select name="prazo" class="form-select">
@@ -119,5 +132,42 @@
         Finalizar Venda
     </button>
 </form>
+
+<!-- ================= JAVASCRIPT ================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const subtotal = parseFloat(document.getElementById("subtotal").innerText);
+    const totalFinal = document.getElementById("total_final");
+
+    const descontoValor = document.getElementById("desconto_valor");
+    const descontoPercentual = document.getElementById("desconto_percentual");
+
+    function atualizarTotal() {
+        let desconto = 0;
+
+        if (descontoValor.value > 0) {
+            desconto = parseFloat(descontoValor.value || 0);
+            descontoPercentual.value = 0;
+        }
+
+        if (descontoPercentual.value > 0) {
+            desconto = subtotal * (parseFloat(descontoPercentual.value) / 100);
+            descontoValor.value = 0;
+        }
+
+        if (desconto > subtotal) {
+            desconto = subtotal;
+        }
+
+        const total = subtotal - desconto;
+        totalFinal.innerText = total.toFixed(2);
+    }
+
+    descontoValor.addEventListener("input", atualizarTotal);
+    descontoPercentual.addEventListener("input", atualizarTotal);
+
+});
+</script>
 
 {% endblock %}
