@@ -1,74 +1,26 @@
-from barcode import Code128
-from barcode.writer import ImageWriter
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
 import os
 from django.conf import settings
 from .models import Produto
-from reportlab.lib.units import cm
+
+from reportlab.pdfgen import canvas
 from reportlab.graphics.barcode import code128
+from reportlab.lib.units import mm, cm
 
+from escpos.printer import Win32Raw
 
-def gerar_etiquetas(produtos):
+def gerar_previa_etiqueta_bematech(produtos_quantidade):
     """
-    Gera um PDF com etiquetas de produtos (em lote)
-    """
-    pasta = os.path.join(settings.MEDIA_ROOT, "etiquetas")
-    os.makedirs(pasta, exist_ok=True)
-
-    pdf_path = os.path.join(pasta, "etiquetas_produtos.pdf")
-    c = canvas.Canvas(pdf_path, pagesize=A4)
-
-    largura, altura = A4
-
-    x = 40
-    y = altura - 80
-
-    for produto in produtos:
-        # --- gerar código de barras ---
-        barcode = Code128(produto.codigo_barras, writer=ImageWriter())
-        barcode_path = os.path.join(pasta, f"{produto.id}")
-        barcode.save(barcode_path)
-
-        # --- texto ---
-        c.setFont("Helvetica", 9)
-        c.drawString(x, y, produto.nome)
-        c.drawString(x, y - 12, f"R$ {produto.preco}")
-
-        # --- imagem do código de barras ---
-        c.drawImage(
-            f"{barcode_path}.png",
-            x,
-            y - 60,
-            width=120,
-            height=40
-        )
-
-        # --- próxima etiqueta ---
-        y -= 120
-
-        if y < 100:
-            c.showPage()
-            y = altura - 80
-
-    c.save()
-    return pdf_path
-
-def gerar_etiquetas_personalizadas(produtos_quantidade):
-    """
-    Etiqueta JOIAS
-    5,2 cm x 1,0 cm
-    Código de barras GRANDE e À ESQUERDA
+    Prévia fiel da etiqueta Bematech
+    52mm x 10mm
     """
 
     pasta = os.path.join(settings.MEDIA_ROOT, "etiquetas")
     os.makedirs(pasta, exist_ok=True)
 
-    pdf_path = os.path.join(pasta, "etiquetas_joias_52x10mm.pdf")
+    pdf_path = os.path.join(pasta, "previa_etiquetas_bematech.pdf")
 
-    # TAMANHO REAL DA ETIQUETA
-    LARGURA = 5.2 * cm
-    ALTURA = 1.0 * cm
+    LARGURA = 52 * mm
+    ALTURA = 10 * mm
 
     c = canvas.Canvas(pdf_path, pagesize=(LARGURA, ALTURA))
 
@@ -77,34 +29,40 @@ def gerar_etiquetas_personalizadas(produtos_quantidade):
 
         for _ in range(quantidade):
 
-            # BORDA (opcional)
-            c.setLineWidth(0.6)
-            c.setStrokeColorRGB(0.8, 0.65, 0.2)  # dourado
-            c.rect(1, 1, LARGURA - 2, ALTURA - 2)
+            # BORDA (só para prévia)
+            c.setLineWidth(0.3)
+            c.rect(0.5, 0.5, LARGURA - 1, ALTURA - 1)
 
-            # TEXTO SUPERIOR
+            # CÓDIGO
             c.setFont("Helvetica", 6)
-            c.drawString(3, ALTURA - 7, f"Cód.: {produto.codigo_barras}")
-            c.drawRightString(LARGURA - 3, ALTURA - 7, produto.nome[:22])
+            c.drawString(1.5 * mm, ALTURA - 3.5 * mm, f"Cód.: {produto.codigo_barras}")
 
-            # 🔥 CÓDIGO DE BARRAS REAL (NÃO IMAGEM)
+            # NOME
+            c.setFont("Helvetica-Bold", 6)
+            c.drawRightString(
+                LARGURA - 1.5 * mm,
+                ALTURA - 3.5 * mm,
+                produto.nome[:22]
+            )
+
+            # BARCODE GRANDE À ESQUERDA
             barcode = code128.Code128(
                 produto.codigo_barras,
-                barHeight=0.55 * cm,
-                barWidth=0.038 * cm  # controla largura REAL das barras
+                barHeight=4.5 * mm,
+                barWidth=0.6
             )
 
             barcode.drawOn(
                 c,
-                -15,     # COLADO À ESQUERDA
-                3
+                -5 * mm,
+                1.2 * mm
             )
 
-            # PREÇO (DIREITA)
-            c.setFont("Helvetica-Bold", 7.8)
+            # PREÇO
+            c.setFont("Helvetica-Bold", 8)
             c.drawRightString(
-                LARGURA - 6,
-                3,
+                LARGURA - 1.5 * mm,
+                1.2 * mm,
                 f"R$ {produto.preco}"
             )
 
@@ -113,3 +71,47 @@ def gerar_etiquetas_personalizadas(produtos_quantidade):
     c.save()
     return pdf_path
 
+def imprimir_etiqueta_bematech(produto):
+    """
+    Modelo de etiqueta JOIAS – Bematech
+    Aproxima 100% do FastReport antigo
+    """
+
+    # 🔴 NOME EXATO da impressora no Windows
+    p = Win32Raw("BEMATECH")
+
+    # ======================
+    # LINHA 1 – CÓDIGO + NOME
+    # ======================
+    codigo = f"Cód.: {produto.codigo_barras}"
+    nome = produto.nome[:22]
+
+    # 48 colunas → empurra nome pra direita
+    linha1 = codigo.ljust(24) + nome.rjust(24)
+    p.set(align="left", bold=True)
+    p.text(linha1 + "\n")
+
+    # ======================
+    # CÓDIGO DE BARRAS
+    # ======================
+    p.barcode(
+        produto.codigo_barras,
+        "CODE128",
+        width=3,     # largura das barras (AJUSTE FINO)
+        height=55,   # altura
+        pos="left",
+        function_type="A"
+    )
+    p.text("\n")
+
+    # ======================
+    # PREÇO + UNIDADE
+    # ======================
+    preco = f"R$ {produto.preco:.2f} UN"
+    p.set(align="right", bold=True, width=1, height=1)
+    p.text(preco + "\n")
+
+    # ======================
+    # CORTE
+    # ======================
+    p.cut()

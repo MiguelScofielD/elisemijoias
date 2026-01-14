@@ -1,19 +1,29 @@
 from django.http import FileResponse
 from .models import Produto
-from .utils import gerar_etiquetas
 from django.shortcuts import render, redirect
 from .models import Produto
-from .utils import gerar_etiquetas_personalizadas
 from .models import Produto, gerar_codigo_barras
 from django.db.models import Q
+from .utils import imprimir_etiqueta_bematech
+from .models import Produto
+from .utils import gerar_previa_etiqueta_bematech
 
+def previa_etiquetas_bematech(request):
+    if request.method != "POST":
+        return redirect("produtos:selecionar_etiquetas")
 
+    produtos_ids = request.POST.getlist("produto")
+    quantidades = request.POST
 
+    produtos_quantidade = []
 
-def etiquetas_produtos(request):
-    produtos = Produto.objects.all()
-    pdf = gerar_etiquetas(produtos)
+    for pid in produtos_ids:
+        qtd = int(quantidades.get(f"quantidade_{pid}", 1))
+        produtos_quantidade.append((pid, qtd))
+
+    pdf = gerar_previa_etiqueta_bematech(produtos_quantidade)
     return FileResponse(open(pdf, "rb"), content_type="application/pdf")
+
 
 def cadastrar_produto(request):
     if request.method == "POST":
@@ -88,3 +98,19 @@ def listar_produtos(request):
             "busca": busca
         }
     )
+
+def imprimir_etiquetas_bematech(request):
+    if request.method != "POST":
+        return redirect("produtos:selecionar_etiquetas")
+
+    produtos_ids = request.POST.getlist("produto")
+    quantidades = request.POST
+
+    for pid in produtos_ids:
+        produto = Produto.objects.get(id=pid)
+        qtd = int(quantidades.get(f"quantidade_{pid}", 1))
+
+        for _ in range(qtd):
+            imprimir_etiqueta_bematech(produto)
+
+    return redirect("produtos:selecionar_etiquetas")
