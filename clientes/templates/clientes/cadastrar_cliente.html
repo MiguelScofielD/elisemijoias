@@ -7,10 +7,36 @@
 <form method="post" class="col-md-6">
     {% csrf_token %}
 
-    <input class="form-control mb-2" name="nome" placeholder="Nome" required>
-    <input class="form-control mb-2" name="telefone" placeholder="Telefone">
-    <input class="form-control mb-2" name="email" placeholder="Email">
-    <input class="form-control mb-2" name="cpf" placeholder="CPF">
+    <input
+        class="form-control mb-2"
+        name="nome"
+        placeholder="Nome"
+        required
+    >
+
+    <input
+        class="form-control mb-2"
+        name="endereco"
+        placeholder="Endereço"
+    >
+
+    <input
+        class="form-control mb-2"
+        name="telefone"
+        placeholder="Telefone"
+    >
+
+    <input
+        class="form-control mb-2"
+        name="email"
+        placeholder="Email"
+    >
+
+    <input
+        class="form-control mb-2"
+        name="cpf"
+        placeholder="CPF"
+    >
 
     <button class="btn btn-dark">Salvar</button>
 </form>

@@ -5,6 +5,7 @@ def cadastrar_cliente(request):
     if request.method == "POST":
         Cliente.objects.create(
             nome=request.POST.get("nome"),
+            endereco=request.POST.get("endereco"),
             telefone=request.POST.get("telefone"),
             email=request.POST.get("email"),
             cpf=request.POST.get("cpf"),

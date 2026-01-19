@@ -61,23 +61,22 @@ def selecionar_etiquetas(request):
         }
     )
 
+# def gerar_etiquetas_selecionadas(request):
+#     if request.method != "POST":
+#         return redirect("produtos:selecionar_etiquetas")
 
-def gerar_etiquetas_selecionadas(request):
-    if request.method != "POST":
-        return redirect("produtos:selecionar_etiquetas")
+#     produtos_ids = request.POST.getlist("produto")
+#     quantidades = request.POST
 
-    produtos_ids = request.POST.getlist("produto")
-    quantidades = request.POST
+#     produtos_quantidade = []
 
-    produtos_quantidade = []
+#     for pid in produtos_ids:
+#         qtd = int(quantidades.get(f"quantidade_{pid}", 1))
+#         produtos_quantidade.append((pid, qtd))
 
-    for pid in produtos_ids:
-        qtd = int(quantidades.get(f"quantidade_{pid}", 1))
-        produtos_quantidade.append((pid, qtd))
+#     pdf = gerar_etiquetas_personalizadas(produtos_quantidade)
 
-    pdf = gerar_etiquetas_personalizadas(produtos_quantidade)
-
-    return FileResponse(open(pdf, "rb"), content_type="application/pdf")
+#     return FileResponse(open(pdf, "rb"), content_type="application/pdf")
 
 def listar_produtos(request):
     busca = request.GET.get("q", "")
