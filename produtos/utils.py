@@ -20,8 +20,8 @@ def gerar_etiquetas_bematech(produtos_quantidade):
     pdf_path = os.path.join(pasta, "etiquetas_bematech_52x10mm.pdf")
 
     # 🔴 PAPEL VERTICAL (IMPORTANTE)
-    LARGURA = 8 * mm
-    ALTURA = 45 * mm
+    LARGURA = 40 * mm
+    ALTURA = 70 * mm
 
     c = canvas.Canvas(pdf_path, pagesize=(LARGURA, ALTURA))
 
@@ -55,7 +55,7 @@ def gerar_etiquetas_bematech(produtos_quantidade):
 
             c.setFont("Helvetica-Bold", 6)
             c.drawRightString(
-                largura_r - 3.0 * mm,
+                largura_r - 25.0 * mm,
                 altura_r - 3 * mm,
                 produto.nome[:22]
             )
@@ -70,14 +70,14 @@ def gerar_etiquetas_bematech(produtos_quantidade):
             barcode.drawOn(
                 c,
                 -3 * mm,
-                1.2 * mm
+                33 * mm
             )
 
             # PREÇO
             c.setFont("Helvetica-Bold", 6.5)
             c.drawRightString(
-                largura_r - 3 * mm,
-                1.2 * mm,
+                largura_r - 25 * mm,
+                33 * mm,
                 f"R$ {produto.preco:.2f}"
             )
 
