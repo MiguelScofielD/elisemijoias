@@ -9,23 +9,19 @@ from reportlab.lib.units import mm
 
 def gerar_etiquetas_bematech(produtos_quantidade):
     """
-    ETIQUETA JOIAS – Elgin Bematech (driver gráfico)
-    Tamanho compatível com o driver: 70mm x 40mm
-
-    Este PDF serve tanto para:
-    - Pré-visualização
-    - Impressão final (Ctrl+P no Windows)
+    PRÉVIA + IMPRESSÃO GRÁFICA
+    Etiqueta JOIAS – Elgin Bematech
+    TAMANHO REAL: 52mm x 10mm
     """
 
-    # 📁 Pasta de saída
     pasta = os.path.join(settings.MEDIA_ROOT, "etiquetas")
     os.makedirs(pasta, exist_ok=True)
 
-    pdf_path = os.path.join(pasta, "etiquetas_bematech.pdf")
+    pdf_path = os.path.join(pasta, "etiquetas_bematech_52x10mm.pdf")
 
-    # 📐 TAMANHO DO PAPEL (IGUAL AO DRIVER)
-    LARGURA = 70 * mm
-    ALTURA = 40 * mm
+    # 🔑 TAMANHO REAL DA ETIQUETA
+    LARGURA = 52 * mm
+    ALTURA = 10 * mm
 
     c = canvas.Canvas(pdf_path, pagesize=(LARGURA, ALTURA))
 
@@ -34,55 +30,54 @@ def gerar_etiquetas_bematech(produtos_quantidade):
 
         for _ in range(quantidade):
 
-            # =========================
-            # BORDA (APENAS VISUAL)
-            # =========================
-            c.setLineWidth(0.3)
-            c.rect(1, 1, LARGURA - 2, ALTURA - 2)
+            # 🔹 BORDA (somente para visualização)
+            c.setLineWidth(0.25)
+            c.rect(0.5, 0.5, LARGURA - 1, ALTURA - 1)
 
-            # =========================
-            # LINHA SUPERIOR
-            # =========================
-            c.setFont("Helvetica", 8)
+            # ===============================
+            # LINHA SUPERIOR: CÓDIGO + NOME
+            # ===============================
+            c.setFont("Helvetica", 6)
             c.drawString(
-                5 * mm,
-                ALTURA - 8 * mm,
+                1.5 * mm,
+                ALTURA - 3 * mm,
                 f"Cód.: {produto.codigo_barras}"
             )
 
-            c.setFont("Helvetica-Bold", 8)
-            c.drawString(
-                30 * mm,
-                ALTURA - 8 * mm,
+            c.setFont("Helvetica-Bold", 6)
+            c.drawRightString(
+                LARGURA - 1.5 * mm,
+                ALTURA - 3 * mm,
                 produto.nome[:22]
             )
 
-            # =========================
-            # CÓDIGO DE BARRAS
-            # =========================
+            # ===============================
+            # BARCODE (ESQUERDA)
+            # ===============================
             barcode = code128.Code128(
                 produto.codigo_barras,
-                barHeight=10 * mm,
-                barWidth=0.6
+                barHeight=5.5 * mm,
+                barWidth=0.38
             )
 
             barcode.drawOn(
                 c,
-                5 * mm,
-                12 * mm
+                -3 * mm,
+                1.2 * mm
             )
 
-            # =========================
-            # PREÇO
-            # =========================
-            c.setFont("Helvetica-Bold", 10)
-            c.drawString(
-                30 * mm,
-                12 * mm,
-                f"R$ {produto.preco:.2f} UN"
+            # ===============================
+            # PREÇO (DIREITA / INFERIOR)
+            # ===============================
+            c.setFont("Helvetica-Bold", 7.5)
+            c.drawRightString(
+                LARGURA - 1.5 * mm,
+                1.4 * mm,
+                f"R$ {produto.preco:.2f}"
             )
 
             c.showPage()
 
     c.save()
     return pdf_path
+
