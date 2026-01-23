@@ -20,8 +20,8 @@ def gerar_etiquetas_bematech(produtos_quantidade):
     pdf_path = os.path.join(pasta, "etiquetas_bematech_52x10mm.pdf")
 
     # 🔴 PAPEL VERTICAL (IMPORTANTE)
-    LARGURA = 10 * mm
-    ALTURA = 52 * mm
+    LARGURA = 8 * mm
+    ALTURA = 45 * mm
 
     c = canvas.Canvas(pdf_path, pagesize=(LARGURA, ALTURA))
 
@@ -38,8 +38,8 @@ def gerar_etiquetas_bematech(produtos_quantidade):
             c.translate(LARGURA, 0)
             c.rotate(90)
 
-            largura_r = ALTURA   # 52mm
-            altura_r = LARGURA   # 10mm
+            largura_r = ALTURA   # 50mm
+            altura_r = LARGURA   # 8mm
 
             # (opcional) BORDA DE TESTE
             c.setLineWidth(0.3)
@@ -48,14 +48,14 @@ def gerar_etiquetas_bematech(produtos_quantidade):
             # TEXTO SUPERIOR
             c.setFont("Helvetica", 6)
             c.drawString(
-                1.5 * mm,
+                2 * mm,
                 altura_r - 3 * mm,
                 f"Cód.: {produto.codigo_barras}"
             )
 
             c.setFont("Helvetica-Bold", 6)
             c.drawRightString(
-                largura_r - 1.5 * mm,
+                largura_r - 3.0 * mm,
                 altura_r - 3 * mm,
                 produto.nome[:22]
             )
@@ -63,20 +63,20 @@ def gerar_etiquetas_bematech(produtos_quantidade):
             # BARCODE À ESQUERDA
             barcode = code128.Code128(
                 produto.codigo_barras,
-                barHeight=5.5 * mm,
+                barHeight=3 * mm,
                 barWidth=0.38
             )
 
             barcode.drawOn(
                 c,
-                1.2 * mm,
+                -3 * mm,
                 1.2 * mm
             )
 
             # PREÇO
-            c.setFont("Helvetica-Bold", 7.5)
+            c.setFont("Helvetica-Bold", 6.5)
             c.drawRightString(
-                largura_r - 1.5 * mm,
+                largura_r - 3 * mm,
                 1.2 * mm,
                 f"R$ {produto.preco:.2f}"
             )
