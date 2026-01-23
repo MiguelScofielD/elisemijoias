@@ -1,17 +1,29 @@
 from django.http import FileResponse
-from .models import Produto
 from django.shortcuts import render, redirect
-from .models import Produto
-from .models import Produto, gerar_codigo_barras
 from django.db.models import Q
-from .utils import imprimir_etiqueta_bematech
-from .models import Produto
-from .utils import gerar_previa_etiqueta_bematech
 from django.contrib import messages
 
+from .models import Produto, gerar_codigo_barras
+from .utils import gerar_etiquetas_bematech
+
+
+# ======================================================
+# ETIQUETAS – PRÉVIA / IMPRESSÃO (PDF)
+# ======================================================
 def previa_etiquetas_bematech(request):
+    """
+    Gera o PDF de etiquetas Bematech
+    Serve tanto para pré-visualização quanto impressão
+    """
+    if request.method != "POST":
+        return redirect("produtos:selecionar_etiquetas")
+
     produtos_ids = request.POST.getlist("produto")
     quantidades = request.POST
+
+    if not produtos_ids:
+        messages.warning(request, "Selecione ao menos um produto.")
+        return redirect("produtos:selecionar_etiquetas")
 
     produtos_quantidade = []
 
@@ -19,12 +31,17 @@ def previa_etiquetas_bematech(request):
         qtd = int(quantidades.get(f"quantidade_{pid}", 1))
         produtos_quantidade.append((pid, qtd))
 
-    pdf = gerar_previa_etiqueta_bematech(produtos_quantidade)
+    pdf = gerar_etiquetas_bematech(produtos_quantidade)
 
-    return FileResponse(open(pdf, "rb"), content_type="application/pdf")
+    return FileResponse(
+        open(pdf, "rb"),
+        content_type="application/pdf"
+    )
 
 
-
+# ======================================================
+# CADASTRO DE PRODUTO
+# ======================================================
 def cadastrar_produto(request):
     if request.method == "POST":
         Produto.objects.create(
@@ -35,14 +52,18 @@ def cadastrar_produto(request):
             estoque_minimo=request.POST.get("estoque_minimo"),
             imagem=request.FILES.get("imagem")
         )
+
+        messages.success(request, "Produto cadastrado com sucesso.")
         return redirect("produtos:listar_produtos")
 
     return render(request, "produtos/cadastrar_produto.html")
 
+
+# ======================================================
+# SELEÇÃO DE ETIQUETAS
+# ======================================================
 def selecionar_etiquetas(request):
     busca = request.GET.get("q", "")
-    selecionados = request.GET.getlist("produto")  # 🔴 ATENÇÃO AQUI
-
     produtos = Produto.objects.all()
 
     if busca:
@@ -57,30 +78,15 @@ def selecionar_etiquetas(request):
         {
             "produtos": produtos,
             "busca": busca,
-            "selecionados": selecionados,
         }
     )
 
-# def gerar_etiquetas_selecionadas(request):
-#     if request.method != "POST":
-#         return redirect("produtos:selecionar_etiquetas")
 
-#     produtos_ids = request.POST.getlist("produto")
-#     quantidades = request.POST
-
-#     produtos_quantidade = []
-
-#     for pid in produtos_ids:
-#         qtd = int(quantidades.get(f"quantidade_{pid}", 1))
-#         produtos_quantidade.append((pid, qtd))
-
-#     pdf = gerar_etiquetas_personalizadas(produtos_quantidade)
-
-#     return FileResponse(open(pdf, "rb"), content_type="application/pdf")
-
+# ======================================================
+# LISTAGEM DE PRODUTOS
+# ======================================================
 def listar_produtos(request):
     busca = request.GET.get("q", "")
-
     produtos = Produto.objects.all()
 
     if busca:
@@ -98,27 +104,41 @@ def listar_produtos(request):
         }
     )
 
+
+# ======================================================
+# IMPRESSÃO (MESMO PDF DA PRÉVIA)
+# ======================================================
 def imprimir_etiquetas_bematech(request):
+    """
+    Impressão via PDF + driver do Windows
+    (Elgin Bematech)
+    """
     if request.method != "POST":
         return redirect("produtos:selecionar_etiquetas")
 
     produtos_ids = request.POST.getlist("produto")
     quantidades = request.POST
 
+    if not produtos_ids:
+        messages.warning(request, "Selecione ao menos um produto.")
+        return redirect("produtos:selecionar_etiquetas")
+
+    produtos_quantidade = []
     total_etiquetas = 0
 
     for pid in produtos_ids:
-        produto = Produto.objects.get(id=pid)
         qtd = int(quantidades.get(f"quantidade_{pid}", 1))
+        produtos_quantidade.append((pid, qtd))
+        total_etiquetas += qtd
 
-        for _ in range(qtd):
-            imprimir_etiqueta_bematech(produto)
-            total_etiquetas += 1
+    pdf = gerar_etiquetas_bematech(produtos_quantidade)
 
-    # 🔔 FEEDBACK PARA O USUÁRIO (ESSENCIAL NO ANYDESK)
     messages.success(
         request,
-        f"🖨️ {total_etiquetas} etiqueta(s) enviadas para a impressora Bematech."
+        f"🖨️ {total_etiquetas} etiqueta(s) geradas. Use Ctrl+P para imprimir na Bematech."
     )
 
-    return redirect("produtos:selecionar_etiquetas")
+    return FileResponse(
+        open(pdf, "rb"),
+        content_type="application/pdf"
+    )

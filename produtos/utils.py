@@ -4,24 +4,28 @@ from .models import Produto
 
 from reportlab.pdfgen import canvas
 from reportlab.graphics.barcode import code128
-from reportlab.lib.units import mm, cm
+from reportlab.lib.units import mm
 
-from escpos.printer import Win32Raw
 
-def gerar_previa_etiqueta_bematech(produtos_quantidade):
+def gerar_etiquetas_bematech(produtos_quantidade):
     """
-    PRÉVIA FIEL – Etiqueta JOIAS Bematech
-    52mm x 10mm
+    ETIQUETA JOIAS – Elgin Bematech (driver gráfico)
+    Tamanho compatível com o driver: 70mm x 40mm
+
+    Este PDF serve tanto para:
+    - Pré-visualização
+    - Impressão final (Ctrl+P no Windows)
     """
 
+    # 📁 Pasta de saída
     pasta = os.path.join(settings.MEDIA_ROOT, "etiquetas")
     os.makedirs(pasta, exist_ok=True)
 
-    pdf_path = os.path.join(pasta, "previa_etiquetas_bematech.pdf")
+    pdf_path = os.path.join(pasta, "etiquetas_bematech.pdf")
 
-    # TAMANHO REAL DA BOBINA
-    LARGURA = 52 * mm
-    ALTURA = 10 * mm
+    # 📐 TAMANHO DO PAPEL (IGUAL AO DRIVER)
+    LARGURA = 70 * mm
+    ALTURA = 40 * mm
 
     c = canvas.Canvas(pdf_path, pagesize=(LARGURA, ALTURA))
 
@@ -30,94 +34,55 @@ def gerar_previa_etiqueta_bematech(produtos_quantidade):
 
         for _ in range(quantidade):
 
-            # 🔹 BORDA (APENAS PARA VISUALIZAÇÃO)
+            # =========================
+            # BORDA (APENAS VISUAL)
+            # =========================
             c.setLineWidth(0.3)
-            c.rect(0.5, 0.5, LARGURA - 1, ALTURA - 1)
+            c.rect(1, 1, LARGURA - 2, ALTURA - 2)
 
-            # 🔹 TEXTO SUPERIOR
-            c.setFont("Helvetica", 6)
+            # =========================
+            # LINHA SUPERIOR
+            # =========================
+            c.setFont("Helvetica", 8)
             c.drawString(
-                1.5 * mm,
-                ALTURA - 3.5 * mm,
+                5 * mm,
+                ALTURA - 8 * mm,
                 f"Cód.: {produto.codigo_barras}"
             )
 
-            c.setFont("Helvetica-Bold", 6)
-            c.drawRightString(
-                LARGURA - 1.5 * mm,
-                ALTURA - 3.5 * mm,
+            c.setFont("Helvetica-Bold", 8)
+            c.drawString(
+                30 * mm,
+                ALTURA - 8 * mm,
                 produto.nome[:22]
             )
 
-            # 🔥 BARCODE GRANDE À ESQUERDA (IGUAL AO ESC/POS)
+            # =========================
+            # CÓDIGO DE BARRAS
+            # =========================
             barcode = code128.Code128(
                 produto.codigo_barras,
-                barHeight=4.5 * mm,
-                barWidth=0.40
+                barHeight=10 * mm,
+                barWidth=0.6
             )
 
             barcode.drawOn(
                 c,
-                -3 * mm,
-                1.2 * mm
+                5 * mm,
+                12 * mm
             )
 
-            # 🔹 PREÇO
-            c.setFont("Helvetica-Bold", 8)
-            c.drawRightString(
-                LARGURA - 1.5 * mm,
-                1.2 * mm,
-                f"R$ {produto.preco:.2f}"
+            # =========================
+            # PREÇO
+            # =========================
+            c.setFont("Helvetica-Bold", 10)
+            c.drawString(
+                30 * mm,
+                12 * mm,
+                f"R$ {produto.preco:.2f} UN"
             )
 
             c.showPage()
 
     c.save()
     return pdf_path
-
-
-def imprimir_etiqueta_bematech(produto):
-    """
-    Etiqueta JOIAS – Bematech
-    ESC/POS PURO (sem PDF, sem rotação)
-    """
-
-    # 🔴 Nome EXATO da impressora no Windows
-    p = Win32Raw("ETIQUETA")  # confirme no Painel de Impressoras
-
-    # ==========================
-    # LINHA 1 – CÓDIGO + NOME
-    # ==========================
-    codigo = f"Cód.: {produto.codigo_barras}"
-    nome = produto.nome[:22]
-
-    # 48 colunas (padrão Bematech)
-    linha = codigo.ljust(24) + nome.rjust(24)
-
-    p.set(align="left", bold=True)
-    p.text(linha + "\n")
-
-    # ==========================
-    # CÓDIGO DE BARRAS (CODE39)
-    # ==========================
-    p.barcode(
-        produto.codigo_barras,
-        "CODE39",     # 🔥 NÃO use CODE128
-        width=3,      # largura das barras
-        height=50,    # altura ideal para etiqueta
-        pos="left"
-    )
-
-    p.text("\n")
-
-    # ==========================
-    # PREÇO
-    # ==========================
-    p.set(align="right", bold=True)
-    p.text(f"R$ {produto.preco:.2f} UN\n")
-
-    # ==========================
-    # AVANÇO + CORTE
-    # ==========================
-    p.text("\n")
-    p.cut()
