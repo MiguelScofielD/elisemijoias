@@ -7,11 +7,9 @@ from django.db.models import Q
 from .utils import imprimir_etiqueta_bematech
 from .models import Produto
 from .utils import gerar_previa_etiqueta_bematech
+from django.contrib import messages
 
 def previa_etiquetas_bematech(request):
-    if request.method != "POST":
-        return redirect("produtos:selecionar_etiquetas")
-
     produtos_ids = request.POST.getlist("produto")
     quantidades = request.POST
 
@@ -22,7 +20,9 @@ def previa_etiquetas_bematech(request):
         produtos_quantidade.append((pid, qtd))
 
     pdf = gerar_previa_etiqueta_bematech(produtos_quantidade)
+
     return FileResponse(open(pdf, "rb"), content_type="application/pdf")
+
 
 
 def cadastrar_produto(request):
@@ -105,11 +105,20 @@ def imprimir_etiquetas_bematech(request):
     produtos_ids = request.POST.getlist("produto")
     quantidades = request.POST
 
+    total_etiquetas = 0
+
     for pid in produtos_ids:
         produto = Produto.objects.get(id=pid)
         qtd = int(quantidades.get(f"quantidade_{pid}", 1))
 
         for _ in range(qtd):
             imprimir_etiqueta_bematech(produto)
+            total_etiquetas += 1
+
+    # 🔔 FEEDBACK PARA O USUÁRIO (ESSENCIAL NO ANYDESK)
+    messages.success(
+        request,
+        f"🖨️ {total_etiquetas} etiqueta(s) enviadas para a impressora Bematech."
+    )
 
     return redirect("produtos:selecionar_etiquetas")

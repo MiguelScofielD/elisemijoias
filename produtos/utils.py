@@ -10,7 +10,7 @@ from escpos.printer import Win32Raw
 
 def gerar_previa_etiqueta_bematech(produtos_quantidade):
     """
-    Prévia fiel da etiqueta Bematech
+    PRÉVIA FIEL – Etiqueta JOIAS Bematech
     52mm x 10mm
     """
 
@@ -19,6 +19,7 @@ def gerar_previa_etiqueta_bematech(produtos_quantidade):
 
     pdf_path = os.path.join(pasta, "previa_etiquetas_bematech.pdf")
 
+    # TAMANHO REAL DA BOBINA
     LARGURA = 52 * mm
     ALTURA = 10 * mm
 
@@ -29,15 +30,18 @@ def gerar_previa_etiqueta_bematech(produtos_quantidade):
 
         for _ in range(quantidade):
 
-            # BORDA (só para prévia)
+            # 🔹 BORDA (APENAS PARA VISUALIZAÇÃO)
             c.setLineWidth(0.3)
             c.rect(0.5, 0.5, LARGURA - 1, ALTURA - 1)
 
-            # CÓDIGO
+            # 🔹 TEXTO SUPERIOR
             c.setFont("Helvetica", 6)
-            c.drawString(1.5 * mm, ALTURA - 3.5 * mm, f"Cód.: {produto.codigo_barras}")
+            c.drawString(
+                1.5 * mm,
+                ALTURA - 3.5 * mm,
+                f"Cód.: {produto.codigo_barras}"
+            )
 
-            # NOME
             c.setFont("Helvetica-Bold", 6)
             c.drawRightString(
                 LARGURA - 1.5 * mm,
@@ -45,25 +49,25 @@ def gerar_previa_etiqueta_bematech(produtos_quantidade):
                 produto.nome[:22]
             )
 
-            # BARCODE GRANDE À ESQUERDA
+            # 🔥 BARCODE GRANDE À ESQUERDA (IGUAL AO ESC/POS)
             barcode = code128.Code128(
                 produto.codigo_barras,
                 barHeight=4.5 * mm,
-                barWidth=0.6
+                barWidth=0.40
             )
 
             barcode.drawOn(
                 c,
-                -5 * mm,
+                -3 * mm,
                 1.2 * mm
             )
 
-            # PREÇO
+            # 🔹 PREÇO
             c.setFont("Helvetica-Bold", 8)
             c.drawRightString(
                 LARGURA - 1.5 * mm,
                 1.2 * mm,
-                f"R$ {produto.preco}"
+                f"R$ {produto.preco:.2f}"
             )
 
             c.showPage()
@@ -71,47 +75,49 @@ def gerar_previa_etiqueta_bematech(produtos_quantidade):
     c.save()
     return pdf_path
 
+
 def imprimir_etiqueta_bematech(produto):
     """
-    Modelo de etiqueta JOIAS – Bematech
-    Aproxima 100% do FastReport antigo
+    Etiqueta JOIAS – Bematech
+    ESC/POS PURO (sem PDF, sem rotação)
     """
 
-    # 🔴 NOME EXATO da impressora no Windows
-    p = Win32Raw("BEMATECH")
+    # 🔴 Nome EXATO da impressora no Windows
+    p = Win32Raw("ETIQUETA")  # confirme no Painel de Impressoras
 
-    # ======================
+    # ==========================
     # LINHA 1 – CÓDIGO + NOME
-    # ======================
+    # ==========================
     codigo = f"Cód.: {produto.codigo_barras}"
     nome = produto.nome[:22]
 
-    # 48 colunas → empurra nome pra direita
-    linha1 = codigo.ljust(24) + nome.rjust(24)
-    p.set(align="left", bold=True)
-    p.text(linha1 + "\n")
+    # 48 colunas (padrão Bematech)
+    linha = codigo.ljust(24) + nome.rjust(24)
 
-    # ======================
-    # CÓDIGO DE BARRAS
-    # ======================
+    p.set(align="left", bold=True)
+    p.text(linha + "\n")
+
+    # ==========================
+    # CÓDIGO DE BARRAS (CODE39)
+    # ==========================
     p.barcode(
         produto.codigo_barras,
-        "CODE128",
-        width=3,     # largura das barras (AJUSTE FINO)
-        height=55,   # altura
-        pos="left",
-        function_type="A"
+        "CODE39",     # 🔥 NÃO use CODE128
+        width=3,      # largura das barras
+        height=50,    # altura ideal para etiqueta
+        pos="left"
     )
+
     p.text("\n")
 
-    # ======================
-    # PREÇO + UNIDADE
-    # ======================
-    preco = f"R$ {produto.preco:.2f} UN"
-    p.set(align="right", bold=True, width=1, height=1)
-    p.text(preco + "\n")
+    # ==========================
+    # PREÇO
+    # ==========================
+    p.set(align="right", bold=True)
+    p.text(f"R$ {produto.preco:.2f} UN\n")
 
-    # ======================
-    # CORTE
-    # ======================
+    # ==========================
+    # AVANÇO + CORTE
+    # ==========================
+    p.text("\n")
     p.cut()
