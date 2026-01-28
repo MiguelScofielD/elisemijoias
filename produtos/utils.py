@@ -11,7 +11,7 @@ def gerar_etiquetas_bematech(produtos_quantidade):
     """
     Etiqueta JOIAS – Elgin Bematech
     PAPEL: 10mm (largura) x 52mm (altura)
-    CONTEÚDO ROTACIONADO PARA IMPRIMIR CERTO
+    Conteúdo rotacionado e invertido conforme impressão real
     """
 
     pasta = os.path.join(settings.MEDIA_ROOT, "etiquetas")
@@ -19,7 +19,7 @@ def gerar_etiquetas_bematech(produtos_quantidade):
 
     pdf_path = os.path.join(pasta, "etiquetas_bematech_52x10mm.pdf")
 
-    # 🔴 PAPEL VERTICAL (IMPORTANTE)
+    # PDF maior para respeitar altura da impressora
     LARGURA = 70 * mm
     ALTURA = 40 * mm
 
@@ -33,34 +33,57 @@ def gerar_etiquetas_bematech(produtos_quantidade):
             c.saveState()
 
             # ==========================
-            # 🔁 ROTAÇÃO CORRETA
+            # 🔁 ROTAÇÃO BASE (90°)
             # ==========================
             c.translate(LARGURA, 0)
             c.rotate(90)
 
-            largura_r = ALTURA   # 50mm
-            altura_r = LARGURA   # 8mm
+            largura_r = ALTURA     # área útil horizontal
+            altura_r = LARGURA
 
-            # (opcional) BORDA DE TESTE
-            c.setLineWidth(0.3)
-            c.rect(0.5, 0.5, largura_r - 1, altura_r - 1)
+            # ==========================
+            # 🔁 ROTAÇÃO EXTRA (180°)
+            # Corrige etiqueta invertida
+            # ==========================
+            c.translate(largura_r, altura_r)
+            c.rotate(180)
 
-            # TEXTO SUPERIOR
-            c.setFont("Helvetica", 7)
-            c.drawString(
-                2 * mm,
-                altura_r - 3 * mm,
-                f"Cód.: {produto.codigo_barras}"
-            )
+            # # ==========================
+            # # BORDA (TESTE VISUAL)
+            # # ==========================
+            # c.setLineWidth(0.3)
+            # c.rect(0.5, 0.5, largura_r - 1, altura_r - 1)
 
+            # ==========================
+            # 🔄 LINHA SUPERIOR (NOME À ESQUERDA / CÓDIGO À DIREITA)
+            # ==========================
             c.setFont("Helvetica-Bold", 8)
-            c.drawRightString(
-                largura_r - 5.0 * mm,
-                altura_r - 3.5 * mm,
+            c.drawString(
+                21 * mm,
+                altura_r - 60 * mm,
                 produto.nome[:22]
             )
 
-            # BARCODE À ESQUERDA
+            c.setFont("Helvetica", 7)
+            c.drawRightString(
+                largura_r - 24 * mm,
+                altura_r - 60 * mm,
+                f"Cód.: {produto.codigo_barras}"
+            )
+
+            # ==========================
+            # 🔄 PREÇO (AGORA À ESQUERDA)
+            # ==========================
+            c.setFont("Helvetica-Bold", 8)
+            c.drawString(
+                21 * mm,
+                4 * mm,
+                f"R$ {produto.preco:.2f}"
+            )
+
+            # ==========================
+            # 🔄 BARCODE (AGORA À DIREITA)
+            # ==========================
             barcode = code128.Code128(
                 produto.codigo_barras,
                 barHeight=5 * mm,
@@ -69,16 +92,8 @@ def gerar_etiquetas_bematech(produtos_quantidade):
 
             barcode.drawOn(
                 c,
-                -4.5 * mm,
-                61 * mm
-            )
-
-            # PREÇO
-            c.setFont("Helvetica-Bold", 8)
-            c.drawRightString(
-                largura_r - 5 * mm,
-                62 * mm,
-                f"R$ {produto.preco:.2f}"
+                largura_r - 43 * mm,
+                3 * mm
             )
 
             c.restoreState()
