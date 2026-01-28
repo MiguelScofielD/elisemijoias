@@ -59,16 +59,16 @@ def gerar_etiquetas_bematech(produtos_quantidade):
             # ==========================
             c.setFont("Helvetica-Bold", 7)
             c.drawString(
-                25.5 * mm,
-                altura_r - 64.5 * mm,
+                3* mm,
+                altura_r - 63.5 * mm,
                 produto.nome[:22]
             )
 
             c.setFont("Helvetica", 7)
             c.drawRightString(
-                largura_r - 22.5 * mm,
+                largura_r - 1 * mm,
                 altura_r - 64 * mm,
-                f"Cód.: {produto.codigo_barras}"
+                f"Cód:{produto.codigo_barras}"
             )
 
             # ==========================
@@ -76,8 +76,8 @@ def gerar_etiquetas_bematech(produtos_quantidade):
             # ==========================
             c.setFont("Helvetica-Bold", 7)
             c.drawString(
-                25.5 * mm,
-                2.5 * mm,
+                6 * mm,
+                3 * mm,
                 f"R$ {produto.preco:.2f}"
             )
 
@@ -92,7 +92,7 @@ def gerar_etiquetas_bematech(produtos_quantidade):
 
             barcode.drawOn(
                 c,
-                largura_r - 42.5 * mm,
+                largura_r -20.5 * mm,
                 2.7 * mm
             )
 
