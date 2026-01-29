@@ -20,3 +20,5 @@ db.sqlite3
 
 # Arquivos de mídia (se houver)
 media/
+
+run.log

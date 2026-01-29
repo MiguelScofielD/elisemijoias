@@ -20,7 +20,7 @@
         <img 
             src="{% static 'images/logo2.png' %}" 
             alt="Elissandra Freitas Semijoias"
-            style="height:55px;"
+            style="height:60px;"
         >
     </div>
 </nav>
@@ -186,6 +186,17 @@
                         ⚙️ Admin
                     </a>
                 </li>
+
+                <hr>
+
+                <li class="nav-item">
+                    <a class="nav-link text-danger"
+                    href="{% url 'core:desligar_sistema' %}"
+                    onclick="return confirm('Deseja realmente desligar o sistema?');">
+                        ⛔ Encerrar Sistema
+                    </a>
+                </li>
+
 
             </ul>
 

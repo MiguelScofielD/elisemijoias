@@ -8,6 +8,10 @@ from vendas.models import Venda
 from produtos.models import Produto
 from financeiro.models import ContaReceber
 
+import os
+import sys
+from django.http import HttpResponse
+
 LIMITE_VENDAS_DASHBOARD = 10
 
 
@@ -81,3 +85,7 @@ def dashboard(request):
             "estoque_baixo": estoque_baixo,
         }
     )
+
+
+def desligar_sistema(request):
+    os._exit(0)
