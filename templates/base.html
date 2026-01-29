@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -14,11 +15,13 @@
 <body class="bg-light">
 
 <!-- TOPO -->
-<nav class="navbar navbar-dark" style="background-color:#e83e8c;">
+<nav class="navbar navbar-dark" style="background-color:#c8b5a4;">
     <div class="container-fluid justify-content-center">
-        <span class="navbar-brand fw-semibold text-uppercase fs-4 m-0">
-            ✨ ELISEMIJOIAS
-        </span>
+        <img 
+            src="{% static 'images/logo2.png' %}" 
+            alt="Elissandra Freitas Semijoias"
+            style="height:55px;"
+        >
     </div>
 </nav>
 
@@ -37,7 +40,7 @@
                     {% if request.resolver_match.url_name == 'dashboard' %}
                         <a class="nav-link"
                            href="{% url 'core:dashboard' %}"
-                           style="background-color:#f8d7e8;color:#e83e8c;font-weight:600;border-radius:6px;">
+                           style="background-color:#c8b5a4;color:#ffffff;font-weight:600;border-radius:6px;">
                             📊 Painel Inicial
                         </a>
                     {% else %}
@@ -56,7 +59,7 @@
                     {% if request.resolver_match.url_name == 'cadastrar_cliente' %}
                         <a class="nav-link"
                            href="{% url 'clientes:cadastrar_cliente' %}"
-                           style="background-color:#f8d7e8;color:#e83e8c;font-weight:600;border-radius:6px;">
+                           style="background-color:#c8b5a4;color:#ffffff;font-weight:600;border-radius:6px;">
                             👤 Cadastrar Cliente
                         </a>
                     {% else %}
@@ -70,7 +73,7 @@
                     {% if request.resolver_match.url_name == 'cadastrar_produto' %}
                         <a class="nav-link"
                            href="{% url 'produtos:cadastrar_produto' %}"
-                           style="background-color:#f8d7e8;color:#e83e8c;font-weight:600;border-radius:6px;">
+                           style="background-color:#c8b5a4;color:#ffffff;font-weight:600;border-radius:6px;">
                             📦 Cadastrar Produto
                         </a>
                     {% else %}
@@ -84,7 +87,7 @@
                     {% if request.resolver_match.url_name == 'listar_produtos' %}
                         <a class="nav-link"
                            href="{% url 'produtos:listar_produtos' %}"
-                           style="background-color:#f8d7e8;color:#e83e8c;font-weight:600;border-radius:6px;">
+                           style="background-color:#c8b5a4;color:#ffffff;font-weight:600;border-radius:6px;">
                             🗂️ Estoque de Produtos
                         </a>
                     {% else %}
@@ -98,7 +101,7 @@
                     {% if request.resolver_match.url_name == 'selecionar_etiquetas' %}
                         <a class="nav-link"
                            href="{% url 'produtos:selecionar_etiquetas' %}"
-                           style="background-color:#f8d7e8;color:#e83e8c;font-weight:600;border-radius:6px;">
+                           style="background-color:#c8b5a4;color:#ffffff;font-weight:600;border-radius:6px;">
                             🏷️ Etiquetas de Produtos
                         </a>
                     {% else %}
@@ -117,7 +120,7 @@
                     {% if request.resolver_match.url_name in 'nova_venda adicionar_codigo confirmar_venda finalizar_venda' %}
                         <a class="nav-link"
                            href="{% url 'vendas:nova_venda' %}"
-                           style="background-color:#f8d7e8;color:#e83e8c;font-weight:600;border-radius:6px;">
+                           style="background-color:#c8b5a4;color:#ffffff;font-weight:600;border-radius:6px;">
                             🛒 Nova Venda
                         </a>
                     {% else %}
@@ -136,7 +139,7 @@
                     {% if request.resolver_match.url_name in 'contas_receber pagar_conta historico_cliente' %}
                         <a class="nav-link"
                            href="{% url 'financeiro:contas_receber' %}"
-                           style="background-color:#f8d7e8;color:#e83e8c;font-weight:600;border-radius:6px;">
+                           style="background-color:#c8b5a4;color:#ffffff;font-weight:600;border-radius:6px;">
                             💰 Contas a Receber
                         </a>
                     {% else %}
@@ -163,7 +166,7 @@
                     {% if request.resolver_match.url_name == 'vendas_periodo' %}
                         <a class="nav-link"
                            href="{% url 'relatorios:vendas_periodo' %}"
-                           style="background-color:#f8d7e8;color:#e83e8c;font-weight:600;border-radius:6px;">
+                           style="background-color:#c8b5a4;color:#ffffff;font-weight:600;border-radius:6px;">
                             📄 Vendas por Período
                         </a>
                     {% else %}
